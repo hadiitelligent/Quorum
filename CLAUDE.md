@@ -73,7 +73,8 @@ also carries the **brief** — the client's summary of the business, pasted
 at convene time (the convene panel offers the prompt to get it from Claude:
 `briefPrompt` in `lib/quorum/session.ts`) — fixed once convened and put
 before the question in every stage prompt (`briefBlock`). And **who is in
-the room**: `advisor_ids`, chosen on the convene panel, fixed once convened;
+the room**: `advisor_ids`, chosen by clicking advisor cards on the board
+(the room starts empty), fixed once convened;
 `rosterFor` (pure) resolves it to the invited advisors still on the board,
 empty meaning everyone (sessions from before the picker).
 

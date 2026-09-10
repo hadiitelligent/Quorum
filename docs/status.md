@@ -70,8 +70,10 @@ preface requires. **The brief** (Hadi's idea): the convene panel has a
 remembered per browser; the brief is a column on the session, fixed once
 convened (guard trigger, tested), carried at every stage in the prompts
 (tested), shown on the session page and in the memo. **Who is in the room** (Hadi's
-idea): the convene panel lists the personas as chips, all on by default;
-the chosen ids are stored on the session (`advisor_ids`, fixed once
+idea): the room starts empty; clicking an advisor card adds them to "In
+the room" above the Convene button (a chip; click it or the card again to
+remove; "add everyone" / "clear" shortcuts); the chosen ids are stored on
+the session (`advisor_ids`, fixed once
 convened, a trigger refuses a view from anyone not invited), the stages run
 for exactly those advisors, and older sessions with an empty list mean
 "everyone who was active". The board of one skips the challenge round.
