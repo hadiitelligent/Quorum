@@ -406,6 +406,11 @@ function ConnectClaude() {
             </li>
             <li>Choose Connect; you will sign in to Quorum and approve it once.</li>
           </ol>
+          <div className="help">
+            Your Claude writes from what it can see: the chat you are in, the project it is in, and its memory. It does not go through your
+            other projects or past chats on its own. So keep one Claude project with your business documents, and say &ldquo;update my Quorum
+            brief&rdquo; from a chat inside it — it will ask for the numbers it is missing and save the brief here.
+          </div>
           {connections && connections.length > 0 && (
             <div className="rows">
               {connections.map((c) => (
