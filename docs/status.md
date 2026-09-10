@@ -76,6 +76,15 @@ convened, a trigger refuses a view from anyone not invited), the stages run
 for exactly those advisors, and older sessions with an empty list mean
 "everyone who was active". The board of one skips the challenge round.
 
+Verified on production on 2026-09-10: a session convened with a brief
+(Meridian, ~1,700 characters) and three chosen advisors (Marcus, Elena, the
+10X Director) ran to done in 38 s (10 Opus 5 calls). The views argued from
+the brief's own figures (the $40M floor, the 14 months, the indemnity
+redlines); the 10X Director cited principles by id; the synthesis was
+concrete and dated; the votes came back Agree, Agree, Agree with the
+softened vote prompt (the first session, before the change, had been five
+"conditional"s).
+
 ## Not yet verified
 
 - **Sign-in by email.** Production sign-in was done with a minted link
