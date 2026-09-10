@@ -17,4 +17,5 @@ export type RosterEntry = {
 export const ROSTER: RosterEntry[] = [
   { name: 'Hadi', email: 'hadi@itelligents.ca', title: 'Founder · Itelligents', admin: true },
   { name: 'Hadi (personal)', email: 'shayesteh_hadi@yahoo.com', title: 'Founder · Itelligents', admin: true },
+  { name: 'Hossein', email: 'hossein@itelligents.ca', title: 'Founder · Itelligents', admin: true },
 ]
