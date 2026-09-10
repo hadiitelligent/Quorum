@@ -63,7 +63,9 @@ Deliberately the same as ITelliBuilder, EQFlow and the Maxest task board:
 mirrors it by hand. `people` (the sign-in roster; `is_admin` unlocks the
 library), `advisors` (soft-removed, never deleted; seeded from
 `seed/advisors/*.json`, with grounding documents from
-`seed/documents/<same basename>/` and its `_documents.json` manifest), `advisor_documents` (text
+`seed/documents/<same basename>/` and its `_documents.json` manifest; a
+`previous_names` list renames a persona in place, and seed-uploaded documents
+no longer in the manifest are removed), `advisor_documents` (text
 only; the whole knowledge base goes into the persona's cached system block,
 capped at `GROUNDING_CHAR_CAP`), `chat_messages` (one private conversation
 per person and advisor), `sessions` + `session_views` + `session_challenges`
@@ -128,14 +130,18 @@ the client reads on a screen comes from `docs/spec.md`'s copy.
 
 Route paths with brackets (`app/api/advisors/[id]`) must be quoted in zsh.
 
-## The 10X Strategic Director
+## Grant Cardone (the GC persona)
 
-An unofficial, Grant Cardone-inspired persona. Its knowledge base is the
-"10X Strategic Director Decision Library" (172 principles with rule,
-operational interpretation, evidence level and counterweight), converted by
-`scripts/import-10x-library.ts` into one document per domain. The
-library's preface and the persona's instructions both say it is not Grant
-Cardone and does not speak for him; keep that in any edit.
+An unofficial AI board member modeled on Grant Cardone's public record,
+2016–2026 — the persona's bio and instructions say it is not him and not
+endorsed by him; keep that line in any edit. Built from Hadi's "GC — Virtual
+Board Member v2" folder: a 164-rule library (17 domains, SAYS/DOES/BOTH/GOV
+basis tags, A/B/C evidence, 21 fixed guardrails, an aggression dial), a
+constitution (system prompt, mental model, scorecard, playbooks, voice,
+guardrails, scenarios) and an evidence base. `scripts/import-gc-persona.ts`
+turns the folder into 21 documents under `seed/documents/06-grant-cardone/`
+(~190k characters; `GROUNDING_CHAR_CAP` is 240k for it). The persona's
+`instructions` are the constitution's drop-in system prompt, condensed.
 
 ## Deliberately left out
 

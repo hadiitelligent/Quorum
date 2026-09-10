@@ -1,0 +1,77 @@
+# Sources behind the GC rule library
+
+S-series: teaching and primary sources. E-series: evidence of documented behaviour (filings, court records, reporting).
+
+- **S1** (SAYS) — The 10X Rule Book. Grant Cardone Training Technologies, Book (2011); current product page. https://store.grantcardone.com/en-ca/collections/allproducts/products/the-10x-rule-book
+- **S2** (SAYS) — Stop Competing and 10X Your Goals. GrantCardone.com, 2018. https://grantcardone.com/stop-competing-and-10x-your-goals/
+- **S3** (SAYS) — 10X Actions and 10X Discipline. GrantCardone.com, 2016. https://grantcardone.com/10x-actions-and-10x-discipline/
+- **S4** (SAYS) — Go All-In and Overcommit. GrantCardone.com, 2016. https://grantcardone.com/go-all-in-and-overcommit/
+- **S5** (SAYS) — How to Manage Time. GrantCardone.com, 2018. https://grantcardone.com/manage-time/
+- **S6** (SAYS) — Be Known or Be Gone. GrantCardone.com, 2021. https://grantcardone.com/be-known-or-be-gone/
+- **S7** (SAYS) — Get Social, Get Attention and Get Paid. GrantCardone.com, 2016. https://grantcardone.com/get-social-get-attention-and-get-paid/
+- **S8** (SAYS) — You MUST Sell to Survive. GrantCardone.com, 2016. https://grantcardone.com/you-must-sell-to-survive/
+- **S9** (SAYS) — Fix Your Business Cycle With These 7 Steps. GrantCardone.com, 2018. https://grantcardone.com/young-hustlers-fix-your-business-cycle-with-these-7-steps-3-15-18/
+- **S10** (SAYS) — Your Complete Sales Follow Up Guide. GrantCardone.com, 2018. https://grantcardone.com/sales-follow-up-guide/
+- **S11** (SAYS) — Trust Is Critical to the Sale. GrantCardone.com, 2018. https://grantcardone.com/critical-to-the-sale/
+- **S12** (SAYS) — Great Salespeople Are Obsessed. GrantCardone.com, 2016. https://grantcardone.com/great-salespeople-are-obsessed/
+- **S13** (SAYS) — Grant Cardone Rebuttal Manual. Grant Cardone Training Technologies, Current product page. https://store.grantcardone.com/products/the-grant-cardone-rebuttal-manual-digital-download
+- **S14** (SAYS) — 10X Sales Manager Workshop. Grant Cardone Training Technologies, 2026. https://store.grantcardone.com/products/10x-sales-manager-workshop
+- **S15** (SAYS) — Grant Cardone Careers. GrantCardone.com, Current. https://grantcardone.com/grant-cardone-careers/
+- **S16** (SAYS) — 10X Business Summit 2026. Grant Cardone Training Technologies, 2026. https://store.grantcardone.com/products/10x-business-summit-2026-october
+- **S17** (SAYS) — Business Accelerator Workshop — 10 Elements of Scale. Cardone Ventures, Current. https://go.cardoneventures.com/businessacceleratorworkshop
+- **S18** (SAYS) — Products and Services. Cardone Ventures, Current. https://cardoneventures.com/products-and-services/
+- **S19** (SAYS) — How to Prepare Your Business for Acquisition. Cardone Ventures, 2026. https://cardoneventures.com/how-to-prepare-your-business-for-acquisition-capturing-the-5-trillion-wealth-transfer/
+- **S20** (SAYS) — Business Acquisition Summit. Cardone Ventures, 2026. https://go.cardoneventures.com/bas-lp-page
+- **S21** (SAYS) — How to Become a Millionaire According to Grant Cardone. GrantCardone.com, 2018. https://grantcardone.com/how-to-become-a-millionaire/
+- **S22** (SAYS) — 10 Biggest Money Mistakes. GrantCardone.com, 2016. https://grantcardone.com/10-biggest-money-mistakes/
+- **S23** (SAYS) — The Mandela Effect & Your Money. GrantCardone.com, 2019. https://grantcardone.com/the-mandela-effect-and-your-money/
+- **S24** (DOES) — Cardone Equity Fund V Offering Circular (Form 1-A). SEC EDGAR, 2018. https://www.sec.gov/Archives/edgar/data/1741665/000147793218004312/cardone_1a.htm
+- **S25** (DOES) — Cardone Equal Opportunity Fund 2 Offering Circular / Post-Qualification Amendment. SEC EDGAR, 2025. https://www.sec.gov/Archives/edgar/data/1915521/000147793225005307/cardone_1apos.htm
+- **S26** (DOES) — Cardone Equal Opportunity Fund 2 Post-Qualification Amendment. SEC EDGAR, 2026. https://www.sec.gov/Archives/edgar/data/1915521/000147793226004483/cardone_1apos.htm
+- **S27** (DOES) — Pino v. Cardone Capital, LLC (9th Cir., 10 Jun 2025). Justia / US Court of Appeals, 2025. https://law.justia.com/cases/federal/appellate-courts/ca9/23-3512/23-3512-2025-06-10.html
+- **S28** (SAYS) — Recession Response Training. Grant Cardone Training Technologies, 2020. https://store.grantcardone.com/en-ca/products/recession-response-training
+- **S29** (SAYS) — Grow Your Business in a Down Market. GrantCardone.com, 2016. https://grantcardone.com/grow-your-business-in-a-down-market/
+- **S30** (SAYS) — Grant Cardone CEO Roundtable. GrantCardone.com, 2026. https://grantcardone.com/grant-cardone-ceo-roundtable/
+- **E1** (DOES) — SEC staff comment correspondence on Fund V — removal of 15% projection. SEC EDGAR, Jul 2018. https://www.sec.gov/Archives/edgar/data/1741665/000147793218003767/filename1.htm
+- **E2** (DOES) — Pino v. Cardone Capital (9th Cir., 21 Dec 2022) — social-media solicitation as statutory seller. Justia, 2022. https://law.justia.com/cases/federal/appellate-courts/ca9/21-55564/21-55564-2022-12-21.html
+- **E3** (DOES) — Cardone Capital class action 2026 — certification, Form 1-K figures, distribution rates. CrowdfundedWealth, 2026. https://www.crowdfundedwealth.com/articles/cardone-capital-class-action-2026
+- **E4** (DOES) — Cardone REIT I investment report — leverage, DSCR, NAV, losses. NOYACK, 2024–25. https://wearenoyack.com/investment-reports/cardone-reit-i/
+- **E5** (DOES) — Berkadia arranges $355M sale / $280M floating-rate debt for San Michele & Colonnade. Berkadia, Dec 2021. https://www.berkadia.com/news/berkadia-arranges-355m-sale-and-280m-debt-financing-for-grant-cardones-purchase-of-two-multifamily-properties-located-in-south-florida/
+- **E6** (DOES) — Cardone drops $744M for four Broward apartment complexes. Commercial Observer, Dec 2021. https://commercialobserver.com/2021/12/grant-cardone-drops-744m-for-four-broward-apartment-complexes/
+- **E7** (DOES) — Cardone Capital hit with rising rates — distributions reduced July 2022. Scientology Money Project (investor emails reproduced), Aug 2022. https://scientologymoneyproject.com/2022/08/20/cardone-capital-hit-with-rising-interest-rates-distributions-reduced-in-july-2022/
+- **E8** (DOES) — Cardone Capital suspends distributions April–June 2020. BiggerPockets forum / investor notice, Apr 2020. https://www.biggerpockets.com/forums/888/topics/823462-grant-cardone-capital-suspending-distributions-to-all-investors
+- **E9** (DOES) — Cardone lays off ~80 of ~180 staff. Scientology Money Project, Mar 2020. https://scientologymoneyproject.com/2020/03/24/grant-cardone-lays-off-80-of-his-180-employees-without-notice-10x-being-hammered-by-the-coronavirus/
+- **E10** (BOTH) — Largest all-cash multifamily deal in South Florida — 'why pay lenders 7.5%'. Benzinga, May 2024. https://benzinga.com/real-estate/24/05/38877574/real-estate-mogul-grant-cardone-closes-largest-all-cash-multifamily-deal-in-south-florida-this-year
+- **E11** (BOTH) — First real-estate/Bitcoin hybrid fund announcement. GlobeNewswire, Dec 2024. https://www.globenewswire.com/news-release/2024/12/26/3002011/0/en/Grant-Cardone-Introduces-First-Ever-Real-Estate-Bitcoin-Hybrid-Fund-With-Cardone-Capital-s-Latest-Offering.html
+- **E12** (BOTH) — Cardone will keep buying Bitcoin using real-estate cash flows. CoinDesk, Jun 2026. https://www.coindesk.com/business/2026/06/26/grant-cardone-says-he-will-keep-buying-bitcoin-using-real-estate-cash-flows
+- **E13** (DOES) — Cardone Capital adds 1,200 BTC — disclosure gaps. CryptoTimes, Aug 2026. https://www.cryptotimes.io/2026/08/29/cardone-capital-adds-1200-btc-through-real-estate-strategy/
+- **E14** (DOES) — Orchid Run, Naples — $89.75M, seller's loan maturity. Gulfshore Business, Aug 2026. https://www.gulfshorebusiness.com/real_estate/bitcoin-fueled-cardone-capital-acquires-orchid-run-deal/article_b74a6671-d3be-4edd-b81f-1e68bd87e6b7.html
+- **E15** (BOTH) — A look at Cardone's portfolio; $15M raised in 90 minutes; 15% target; market rationale. The Real Deal, Oct 2019. https://therealdeal.com/miami/2019/10/04/a-look-at-grant-cardones-real-estate-portfolio-and-how-he-raised-15m-in-90-minutes-at-marlins-park/
+- **E16** (SAYS) — Grant Cardone: avoid 6 common real estate mistakes (buy small, sell great, >75% LTV). Yahoo Finance, Aug 2021. https://finance.yahoo.com/news/grant-cardone-avoid-6-common-005815071.html
+- **E17** (SAYS) — Cardone slams Fed; 'I invest for generations'. Moneywise, Jul 2023. https://moneywise.com/investing/real-estate/cardone-slams-fed-for-pain-its-caused-real-estate
+- **E18** (SAYS) — 2024 'greatest real estate correction'; five-step process; rates under 4% forecast. Yahoo Finance, Dec 2023. https://finance.yahoo.com/news/grant-cardone-2024-start-greatest-140026347.html
+- **E19** (DOES) — HuffPost investigation — markups, fees, contracts, ex-staff accounts. HuffPost, Jul 2023. https://www.huffpost.com/entry/grant-cardone-financial-influencer_n_64ada368e4b0e87d65574e9b
+- **E20** (DOES) — Cardone Capital review — fees, GP co-invest, structures. CrowdfundedWealth, 2026. https://www.crowdfundedwealth.com/reviews/cardone-capital-review
+- **E21** (DOES) — Robb v. Cardone — $1B defamation suit over posts about ex-CMO. USA Herald, May 2026. https://usaherald.com/a-1-billion-reckoning-inside-the-robb-v-cardone-defamation-lawsuit-and-grant-cardones-mounting-legal-troubles/
+- **E22** (DOES) — Cardone / Brecka dueling suits settled. InsuranceNewsNet, Apr 2025. https://insurancenewsnet.com/innarticle/grant-cardone-gary-brecka-settle-dueling-state-lawsuits
+- **E23** (DOES) — Cardone v. Legere — settlement and 'apology letter'. Law.com Daily Business Review, Jan 2025. https://www.law.com/dailybusinessreview/2025/01/13/full-throated-apology-legal-theory-in-the-grant-cardonejohn-legere-feud/
+- **E24** (DOES) — Howell v. Cardone — $500M defamation complaint. PR Newswire, Dec 2025. https://www.prnewswire.com/news-releases/former-miss-universe-canada-delegate-sues-grant-cardone-and-cardone-capital-seeking-500-million-in-florida-defamation-case-302663547.html
+- **E25** (DOES) — Wellington Club workforce-housing audit. Palm Beach County Office of Inspector General, Nov 2025. https://pbc.gov/oig/docs/reports/11-20-25-Wellington_Club_WHP_Audit-2026-A-0002.pdf
+- **E26** (DOES) — Deposition published; opt-outs; buy-out cheques. Scientology Money Project / The Real Deal, Jul–Aug 2026. https://therealdeal.com/miami/2026/08/21/draftwhat-happened-in-grant-cardones-12-hour-deposition/
+- **E27** (SAYS) — Cardone's response to revived lawsuit — 'believing I will tap out'. Yahoo Finance / Benzinga, Jun 2025. https://finance.yahoo.com/news/grant-cardones-previously-dismissed-lawsuit-183034328.html
+- **E28** (DOES) — Class action dismissed; Cardone attacks The Real Deal. The Real Deal, Oct 2023. https://therealdeal.com/miami/2023/10/16/grant-cardone-class-action-lawsuit-gets-tossed-out/
+- **E29** (SAYS) — Handle Your Haters. GrantCardone.com, n.d.. https://grantcardone.com/handle-your-haters/
+- **E30** (DOES) — Glassdoor review — Grant Cardone Enterprises, Aventura. Glassdoor, Dec 2024. https://www.glassdoor.com/Reviews/Employee-Review-Grant-Cardone-Enterprises-E1470243-RVW93764710.htm
+- **E31** (SAYS) — How do you hire the right salespeople. GrantCardone.com, n.d.. https://grantcardone.com/how-do-you-hire-the-right-salespeople/
+- **E32** (SAYS) — Culture is how your business will win. GrantCardone.com, n.d.. https://grantcardone.com/culture-is-how-your-business-will-win/
+- **E33** (SAYS) — The Price Myth. GrantCardone.com, n.d.. https://grantcardone.com/the-price-myth/
+- **E34** (SAYS) — Businesses die in obscurity. GrantCardone.com, n.d.. https://grantcardone.com/businesses-die-in-obscurity-do-all-you-can-to-gain-attention/
+- **E35** (BOTH) — Cardone admits to huge mistake with podcast strategy. GrantCardone.com, Apr 2018. https://grantcardone.com/grant-cardone-admits-to-making-huge-mistake-with-podcast-strategy/
+- **E36** (SAYS) — Two mistakes Grant Cardone made — 'too cautious', 'too realistic'. Yahoo Finance, May 2025. https://finance.yahoo.com/news/2-mistakes-grant-cardone-made-110018392.html
+- **E37** (SAYS) — Speed of decisions accelerates success. Benzinga, Apr 2025. https://www.benzinga.com/news/25/04/44763047/grant-cardone-shares-a-key-success-trait-the-speed-at-which-you-can-make-decisions-will-accelerate-your-success
+- **E38** (SAYS) — Escaping the middle class — quit savings, skip homeownership. Benzinga, Dec 2025. https://www.benzinga.com/news/topics/25/12/49364639/grant-cardone-says-escaping-the-middle-class-means-quitting-savings-skipping-homeownership-and-avoidi
+- **E39** (SAYS) — Rents will nearly double in a decade; fund yield target 7–9%. Benzinga, Jun 2024. https://www.benzinga.com/general/24/06/39411231/grant-cardone-thinks-the-average-rent-in-america-will-nearly-double-in-the-next-decade-and-hes-inves
+- **E40** (DOES) — Cardone Ventures unsolicited $4.25/sh proposal for PetMed Express. BusinessWire, Dec 2025. https://www.businesswire.com/news/home/20251216526935/en/Cardone-Ventures-Announces-Unsolicited-$4.25-Per-Share-All-Cash-Proposal-to-Acquire-PetMed-Express
+- **E41** (SAYS) — Is Bitcoin a good investment? (2017 rejection). Medium / 10X Entrepreneur, Dec 2017. https://medium.com/the-10x-entrepreneur/is-bitcoin-a-good-investment-a21030dad6fd
+- **E42** (DOES) — MSG rally remarks. NBC News, Oct 2024. https://www.nbcnews.com/politics/2024-election/trump-madison-square-garden-rally-allies-crude-racist-remarks-rcna177487
+- **E43** (SAYS) — Millionaire Booklet summary — who's got my money, stay broke, sacred account. Timochenko, n.d.. https://www.timochenko.com/blog/the-millionaire-booklet-book-summary/

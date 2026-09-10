@@ -45,6 +45,8 @@ function readDocuments(advisorFile: string): { title: string; category: string; 
 
 const SEED_ADVISOR = z.object({
   name: z.string().trim().min(1),
+  /** Names this persona went by before; a row under one of them is renamed in place. */
+  previous_names: z.array(z.string().trim().min(1)).default([]),
   role: z.string().trim().min(1),
   bio: z.string().default(''),
   temperament: z.string().default(''),
@@ -129,13 +131,15 @@ async function main() {
     let order = 0
     for (const { file, advisor } of advisors) {
       order += 1
-      const found = existing?.find((e) => e.name === advisor.name)
+      const found = existing?.find((e) => e.name === advisor.name) ?? existing?.find((e) => advisor.previous_names.includes(e.name))
       if (dryRun) {
         const docs = readDocuments(file)
         console.log(`  ${found ? '·' : '+'} ${advisor.name.padEnd(18)} ${found ? 'would update' : 'would create'} (${file})${docs.length ? ` + ${docs.length} document(s)` : ''}`)
         continue
       }
-      const row = { ...advisor, active: true, sort_order: order, updated_by: 'seed' }
+      const { previous_names: _previous, ...columns } = advisor
+      void _previous
+      const row = { ...columns, active: true, sort_order: order, updated_by: 'seed' }
       const { error: writeError } = found
         ? await admin.from('advisors').update(row).eq('id', found.id)
         : await admin.from('advisors').insert({ ...row, created_by: 'seed' })
@@ -144,13 +148,23 @@ async function main() {
         process.exitCode = 1
         continue
       }
-      console.log(`  ✓ ${advisor.name.padEnd(18)} ${found ? 'updated' : 'created'}`)
+      console.log(`  ✓ ${advisor.name.padEnd(18)} ${found ? (found.name !== advisor.name ? `updated (renamed from ${found.name})` : 'updated') : 'created'}`)
 
       // --- grounding documents ------------------------------------------
+      // The seed owns the documents it uploaded: what is in the manifest is
+      // upserted by title, and seed-uploaded rows no longer in it are removed.
       const docs = readDocuments(file)
-      if (docs.length === 0) continue
       const { data: idRow } = await admin.from('advisors').select('id').eq('name', advisor.name).maybeSingle()
       if (!idRow) continue
+      const keep = new Set(docs.map((d) => d.title))
+      const { data: stale } = await admin.from('advisor_documents').select('id, title').eq('advisor_id', idRow.id).eq('uploaded_by', 'seed')
+      for (const s of stale ?? []) {
+        if (!keep.has(s.title)) {
+          await admin.from('advisor_documents').delete().eq('id', s.id)
+          console.log(`      − ${s.title} (no longer in the seed)`)
+        }
+      }
+      if (docs.length === 0) continue
       for (const doc of docs) {
         await admin.from('advisor_documents').delete().eq('advisor_id', idRow.id).eq('title', doc.title)
         const { error: docError } = await admin

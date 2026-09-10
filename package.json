@@ -16,7 +16,7 @@
     "db:test": "bash scripts/db-test.sh",
     "test:unit": "node --conditions=react-server --import tsx --test tests/unit/*.test.ts",
     "signin": "node --conditions=react-server --import tsx scripts/dev-signin.ts",
-    "import:10x": "node --conditions=react-server --import tsx scripts/import-10x-library.ts",
+    "import:gc": "node --conditions=react-server --import tsx scripts/import-gc-persona.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "preflight": "bash scripts/preflight.sh",
     "predeploy": "bash scripts/preflight.sh",

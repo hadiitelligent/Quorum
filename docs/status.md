@@ -87,6 +87,16 @@ concrete and dated; the votes came back Agree, Agree, Agree with the
 softened vote prompt (the first session, before the change, had been five
 "conditional"s).
 
+**2026-09-10, later.** The 10X Strategic Director was replaced by **Grant
+Cardone** (the "GC" v2 build from `~/Documents/Digital Twins/Grant Cardone
+Combined Persona`): 164 rules in 17 domains with fixed guardrails and an
+aggression dial, the constitution and the evidence base — 21 documents,
+~190k characters, so the grounding cap rose from 120k to 240k. The persona
+was renamed in place (`previous_names` in the seed), so its earlier chats and
+session contributions stay attached; the old 18 documents were removed by
+the seed. Its instructions are the constitution's drop-in system prompt,
+condensed, with the honesty line ("not him, not endorsed by him") kept.
+
 ## Not yet verified
 
 - **Sign-in by email.** Production sign-in was done with a minted link

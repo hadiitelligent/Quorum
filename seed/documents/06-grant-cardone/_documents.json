@@ -1,0 +1,107 @@
+[
+  {
+    "file": "00-how-to-read.md",
+    "title": "How to read the GC rule library",
+    "category": "rule library"
+  },
+  {
+    "file": "01-goals-targets-and-action.md",
+    "title": "GC rules — A. Goals, Targets & Action",
+    "category": "rule library"
+  },
+  {
+    "file": "02-strategy-scale-and-competitive-position.md",
+    "title": "GC rules — B. Strategy, Scale & Competitive Position",
+    "category": "rule library"
+  },
+  {
+    "file": "03-sales-architecture-and-pipeline.md",
+    "title": "GC rules — C. Sales Architecture & Pipeline",
+    "category": "rule library"
+  },
+  {
+    "file": "04-follow-up-objections-closing-and-pricing.md",
+    "title": "GC rules — D. Follow-up, Objections, Closing & Pricing",
+    "category": "rule library"
+  },
+  {
+    "file": "05-marketing-attention-and-brand.md",
+    "title": "GC rules — E. Marketing, Attention & Brand",
+    "category": "rule library"
+  },
+  {
+    "file": "06-finance-and-capital-allocation.md",
+    "title": "GC rules — F. Finance & Capital Allocation",
+    "category": "rule library"
+  },
+  {
+    "file": "07-capital-structure-and-debt.md",
+    "title": "GC rules — G. Capital Structure & Debt",
+    "category": "rule library"
+  },
+  {
+    "file": "08-real-estate-investing.md",
+    "title": "GC rules — H. Real Estate Investing",
+    "category": "rule library"
+  },
+  {
+    "file": "09-people-leadership-and-accountability.md",
+    "title": "GC rules — I. People, Leadership & Accountability",
+    "category": "rule library"
+  },
+  {
+    "file": "10-operations-systems-and-cadence.md",
+    "title": "GC rules — J. Operations, Systems & Cadence",
+    "category": "rule library"
+  },
+  {
+    "file": "11-negotiation-and-deal-structure.md",
+    "title": "GC rules — K. Negotiation & Deal Structure",
+    "category": "rule library"
+  },
+  {
+    "file": "12-manda-partnerships-and-platforms.md",
+    "title": "GC rules — L. M&A, Partnerships & Platforms",
+    "category": "rule library"
+  },
+  {
+    "file": "13-crisis-downturns-and-adversity.md",
+    "title": "GC rules — M. Crisis, Downturns & Adversity",
+    "category": "rule library"
+  },
+  {
+    "file": "14-reputation-trust-and-disputes.md",
+    "title": "GC rules — N. Reputation, Trust & Disputes",
+    "category": "rule library"
+  },
+  {
+    "file": "15-governance-compliance-and-guardrails.md",
+    "title": "GC rules — O. Governance, Compliance & Guardrails",
+    "category": "rule library"
+  },
+  {
+    "file": "16-meta-decision-patterns.md",
+    "title": "GC rules — P. Meta Decision Patterns",
+    "category": "rule library"
+  },
+  {
+    "file": "17-board-process-voice-and-improvement.md",
+    "title": "GC rules — Q. Board Process, Voice & Improvement",
+    "category": "rule library"
+  },
+  {
+    "file": "90-constitution.md",
+    "title": "GC constitution — posture, mental model, playbooks, voice, guardrails, scenarios",
+    "category": "constitution"
+  },
+  {
+    "file": "91-evidence-base.md",
+    "title": "GC evidence base — timeline, contradictions, behavioural patterns 2016–2026",
+    "category": "evidence base"
+  },
+  {
+    "file": "99-sources.md",
+    "title": "Sources behind the GC rule library",
+    "category": "source list"
+  }
+]

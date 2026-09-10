@@ -11,8 +11,12 @@ import type { Advisor, SessionChallenge, SessionView } from '@/lib/quorum/types'
  * shared across every stage of a session and every private chat.
  */
 
-/** The whole knowledge base goes into the prompt; past this it is trimmed, last document first. */
-export const GROUNDING_CHAR_CAP = 120_000
+/**
+ * The whole knowledge base goes into the prompt; past this it is trimmed, last
+ * document first. 240k characters is roughly 60k tokens — cache-marked, so a
+ * session's stages and every chat turn pay cache-read rates for it.
+ */
+export const GROUNDING_CHAR_CAP = 240_000
 
 export type Grounding = { title: string; category: string; content: string }
 

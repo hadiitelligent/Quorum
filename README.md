@@ -23,7 +23,7 @@ npm run test:unit                    # the text helpers, the session state machi
 npm run dev                          # http://localhost:3000 (needs .env.local)
 npm run dev && open http://localhost:3000/demo   # the screens over scripted data, no database, no model
 npm run seed -- --advisors           # the roster (scripts/roster.ts) + the personas and their grounding documents
-npm run import:10x -- lib.json       # the 10X decision library → seed/documents/06-10x-strategic-director/
+npm run import:gc -- "<folder>"       # the GC persona build → seed/documents/06-grant-cardone/
 npm run deploy                       # preflight (types, lint, unit tests, database suite) → build → Cloudflare → smoke test
 ```
 
