@@ -112,7 +112,10 @@ current brief and asks their Claude to rewrite it with a "what changed"
 section. The full-brief prompt now covers assets, liabilities, goals and
 targets and the pipeline explicitly; the cap rose to 60k characters. The
 board's convene panel just says how fresh the brief is and links to the
-page.
+page. Verified on production: Hadi's first visit redirected to /business;
+the pasted Meridian brief was read into the dashboard in 22 s (after one
+fix — the insight schema was too large for the API's output grammar, so
+the extraction now asks for plain JSON and validates it).
 
 ## Not yet verified
 

@@ -133,7 +133,11 @@ private chat, so a session mostly pays for the question and the views.
 Structured stages (challenge target, vote) use `output_config.format` with a
 zod schema and re-validate the text; the SDK's helper type is cast to the
 beta `BetaJSONOutputFormat` (`lib/board/model.ts`) — the only cast in the
-model layer.
+model layer. **Trap already paid for:** a schema the size of `InsightSchema`
+is refused by the API ("The compiled grammar is too large"), so the insight
+extraction uses `callJsonLoose` — JSON asked for in the prompt with an
+example of the shape, fences stripped, zod validating — the same fallback
+ITelliBuilder's interpreter needed.
 
 ## Conventions
 
