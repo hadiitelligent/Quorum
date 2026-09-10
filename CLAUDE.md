@@ -118,6 +118,22 @@ copies the brief onto the session; `lib/board/chat.ts` puts it in the
 private chats as its own cache-marked block. The board redirects to
 `/business` until a brief exists.
 
+## The connector
+
+`/api/mcp` is an MCP server over Streamable HTTP (stateless, one server per
+request, `@modelcontextprotocol/sdk`'s Web-standard transport) behind a
+bearer token from Quorum's own OAuth 2.1 server (`lib/oauth/server.ts`;
+discovery at `/.well-known/oauth-authorization-server` and
+`/.well-known/oauth-protected-resource[/api/mcp]`; `/oauth/register`,
+`/oauth/authorize` (+ `/approve`), `/oauth/token`, `/oauth/revoke`). The
+token names the person; the tools (`lib/mcp/server.ts`) act as them through
+the service-role client with the same ownership checks the routes make.
+The OAuth tables have RLS on and no policies: service role only. Secrets
+are stored as SHA-256. The middleware keeps discovery, register, token and
+revoke public; `/oauth/authorize` needs sign-in, and the middleware
+remembers the path in a `quorum.next` cookie so the sign-in link returns
+there.
+
 ## The convene orchestration
 
 The browser drives it (`components/session/session.tsx`): read the record,

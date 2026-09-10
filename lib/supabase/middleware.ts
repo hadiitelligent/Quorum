@@ -41,7 +41,16 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const isPublicPath = pathname === '/login' || pathname.startsWith('/auth/')
+  const isPublicPath =
+    pathname === '/login' ||
+    pathname.startsWith('/auth/') ||
+    // The connector's OAuth server: discovery, registration, tokens are called by
+    // the client's Claude, never by a browser session. /oauth/authorize is NOT
+    // public — that is where the person signs in.
+    pathname.startsWith('/.well-known/') ||
+    pathname === '/oauth/register' ||
+    pathname === '/oauth/token' ||
+    pathname === '/oauth/revoke'
 
   // API routes answer for themselves with a 401, never with an HTML login page
   // that reads as a 200 to a caller.
@@ -51,7 +60,13 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.search = ''
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    // Remember where they were going (the OAuth approval page, typically) so
+    // the sign-in link brings them back. Same browser; fifteen minutes.
+    if (pathname !== '/' && !pathname.startsWith('/_next')) {
+      redirect.cookies.set('quorum.next', `${pathname}${request.nextUrl.search}`, { path: '/', maxAge: 900, httpOnly: true, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:' })
+    }
+    return redirect
   }
 
   return response

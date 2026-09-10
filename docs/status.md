@@ -127,6 +127,20 @@ fixed once closed — tested) and into the challenge, synthesis and vote
 prompts. Others watching see "waiting for the client". The memo carries the
 questions and answers.
 
+**2026-09-11 — the connector.** Quorum is a remote MCP connector a client
+adds to their Claude once (Settings → Connectors → Add custom connector →
+`https://quorum.itelligents.workers.dev/api/mcp`). Its own OAuth 2.1 server
+(`lib/oauth/`): dynamic client registration, `/oauth/authorize` where the
+person signs in to Quorum and approves with one click, PKCE code exchange,
+day-long access tokens and 90-day rotating refresh tokens, all stored
+hashed in tables only the service role can read (tested). Tools
+(`lib/mcp/server.ts`): get_brief, save_brief (re-reads the insight),
+list_advisors, list_sessions, get_session (open questions flagged),
+answer_questions, convene. The Business page has a "Connect your Claude"
+card with the URL, the steps, and the connected Claudes with Disconnect.
+Sign-in now returns to where the person was going (a cookie set by the
+middleware), so the approval page survives the magic link.
+
 ## Not yet verified
 
 - **Sign-in by email.** Production sign-in was done with a minted link

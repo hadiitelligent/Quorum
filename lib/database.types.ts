@@ -125,6 +125,29 @@ export type SessionVoteRow = {
   created_at: Timestamptz
 }
 
+export type OAuthClientRow = { id: string; name: string; redirect_uris: string[]; created_at: Timestamptz }
+export type OAuthCodeRow = {
+  code_hash: string
+  client_id: string
+  person_id: string
+  redirect_uri: string
+  code_challenge: string
+  scope: string
+  expires_at: Timestamptz
+  used_at: Timestamptz | null
+}
+export type OAuthTokenRow = {
+  token_hash: string
+  kind: 'access' | 'refresh'
+  client_id: string
+  person_id: string
+  scope: string
+  expires_at: Timestamptz
+  revoked_at: Timestamptz | null
+  last_used_at: Timestamptz | null
+  created_at: Timestamptz
+}
+
 type Table<Row, Insert, Update = Partial<Insert>> = { Row: Row; Insert: Insert; Update: Update; Relationships: [] }
 
 export type Database = {
@@ -143,6 +166,9 @@ export type Database = {
         ChatMessageRow,
         Pick<ChatMessageRow, 'person_id' | 'advisor_id' | 'role' | 'content'> & Partial<Pick<ChatMessageRow, 'id' | 'model'>>
       >
+      oauth_clients: Table<OAuthClientRow, Pick<OAuthClientRow, 'id' | 'redirect_uris'> & Partial<Pick<OAuthClientRow, 'name'>>>
+      oauth_codes: Table<OAuthCodeRow, Omit<OAuthCodeRow, 'used_at' | 'scope'> & Partial<Pick<OAuthCodeRow, 'used_at' | 'scope'>>>
+      oauth_tokens: Table<OAuthTokenRow, Pick<OAuthTokenRow, 'token_hash' | 'kind' | 'client_id' | 'person_id' | 'expires_at'> & Partial<Pick<OAuthTokenRow, 'scope' | 'revoked_at' | 'last_used_at'>>>
       briefs: Table<BriefRow, Pick<BriefRow, 'person_id' | 'content'> & Partial<Pick<BriefRow, 'insight' | 'insight_model' | 'insight_error'>>>
       sessions: Table<
         SessionRow,

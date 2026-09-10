@@ -45,6 +45,13 @@ each session an update prompt carries the current brief back to their
 Claude for a "what changed" rewrite. Every advisor reads the brief at every
 stage, and the copy the board saw stays on the session's record.
 
+## The connector
+
+Quorum is also a connector for the client's own Claude: added once in
+Claude's settings (custom connector, URL `/api/mcp`), it lets their Claude
+read and update the standing brief, see the board and its sessions, answer
+the board's open questions when told to, and convene — no copy and paste.
+
 ## How a session runs
 
 ```

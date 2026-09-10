@@ -24,6 +24,8 @@ async function call<T>(url: string, method: string, body?: unknown): Promise<Res
   }
 }
 
+export type Connection = { clientId: string; clientName: string; connectedAt: string; lastUsedAt: string | null; expiresAt: string }
+
 export type StandingBrief = { content: string; updatedAt: string | null; insight: Insight | null; insightError: string }
 
 export type AdvisorBody = {
@@ -51,6 +53,10 @@ export const api = {
   brief: {
     get: () => call<{ brief: StandingBrief }>('/api/brief', 'GET'),
     save: (content: string) => call<{ brief: StandingBrief }>('/api/brief', 'PUT', { content }),
+  },
+  connections: {
+    list: () => call<{ connections: Connection[] }>('/api/connections', 'GET'),
+    remove: (clientId: string) => call<{ ok: true }>(`/api/connections/${clientId}`, 'DELETE'),
   },
   chat: {
     get: (advisorId: string) => call<{ advisor: Advisor; messages: ChatMessage[] }>(`/api/advisors/${advisorId}/chat`, 'GET'),

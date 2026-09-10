@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { ArrowRight, CircleNotch, Copy, UsersThree } from '@phosphor-icons/react'
+import { ArrowRight, CircleNotch, Copy, PlugsConnected, UsersThree } from '@phosphor-icons/react'
 import type { Insight } from '@/lib/quorum/insight'
 import { money, months, pct, totalOf, weightedPipeline } from '@/lib/quorum/insight'
 import { BRIEF_CHAR_CAP, briefAgeDays, briefPrompt, updatePrompt } from '@/lib/quorum/session'
-import { api, type StandingBrief } from '@/lib/client-api'
+import { api, type Connection, type StandingBrief } from '@/lib/client-api'
+import { convenedLabel } from '@/lib/quorum/text'
 import { useHref, useShell } from '@/components/shell/context'
 
 /**
@@ -177,6 +178,8 @@ export function Business() {
 
       {error && <div className="msg warn">{error}</div>}
 
+      {!editing && <ConnectClaude />}
+
       {hasBrief && !editing && (brief.insight ? <InsightView insight={brief.insight} ageLabel={ageLabel} /> : <div className="empty">
           The brief is saved ({ageLabel}), but no insight could be read from it yet.{brief.insightError ? ` ${brief.insightError}` : ''} Open &ldquo;Update the brief&rdquo; and save it again to retry.
         </div>)}
@@ -330,5 +333,100 @@ function InsightView({ insight, ageLabel }: { insight: Insight; ageLabel: string
         </section>
       </div>
     </>
+  )
+}
+
+/**
+ * The connector: how a client's Claude gets a direct line to the board —
+ * read and update the brief, see the sessions, answer the board's questions
+ * — with no copy and paste. One custom connector in their Claude's settings.
+ */
+function ConnectClaude() {
+  const { demo } = useShell()
+  // The demo has no connector; everywhere else the list is fetched.
+  const [connections, setConnections] = useState<Connection[] | null>(() => (demo ? [] : null))
+  const [open, setOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const url = typeof window !== 'undefined' ? `${window.location.origin}/api/mcp` : '/api/mcp'
+
+  useEffect(() => {
+    if (demo) return
+    let alive = true
+    api.connections.list().then((r) => {
+      if (alive && r.ok) setConnections(r.data.connections)
+    })
+    return () => {
+      alive = false
+    }
+  }, [demo])
+
+  async function remove(clientId: string) {
+    const r = await api.connections.remove(clientId)
+    if (r.ok) setConnections((c) => (c ?? []).filter((x) => x.clientId !== clientId))
+  }
+
+  const connected = connections?.length ?? 0
+
+  return (
+    <div className="card elev-sm connect">
+      <button type="button" className="brief-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <PlugsConnected size={15} color="var(--color-accent)" />
+        <span className="kicker muted">Connect your Claude</span>
+        <span className="help">{connections === null ? '…' : connected ? `${connected} connected` : 'Skip the copy and paste — let your Claude update the brief itself'}</span>
+      </button>
+      {open && (
+        <div className="brief-body">
+          <div className="help">
+            Add Quorum as a connector in your Claude once. From then on, &ldquo;update my Quorum brief&rdquo; in your Claude writes the brief from what
+            it knows and saves it here; it can also read the board&rsquo;s open questions and answer them when you say so, and convene a session.
+          </div>
+          <ol className="steps-list">
+            <li>
+              In Claude, open <b>Settings → Connectors → Add custom connector</b>.
+            </li>
+            <li>
+              Paste this URL and choose Add:
+              <div className="brief-actions" style={{ marginTop: 4 }}>
+                <code className="url">{url}</code>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(url)
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2000)
+                    } catch {}
+                  }}
+                >
+                  <Copy size={13} />
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </li>
+            <li>Choose Connect; you will sign in to Quorum and approve it once.</li>
+          </ol>
+          {connections && connections.length > 0 && (
+            <div className="rows">
+              {connections.map((c) => (
+                <div className="row" key={c.clientId}>
+                  <span>
+                    {c.clientName}
+                    <span className="help">
+                      {' '}
+                      · connected {convenedLabel(c.connectedAt).toLowerCase()}
+                      {c.lastUsedAt ? ` · last used ${convenedLabel(c.lastUsedAt).toLowerCase()}` : ''}
+                    </span>
+                  </span>
+                  <button type="button" className="btn btn-ghost btn-sm muted" onClick={() => remove(c.clientId)}>
+                    Disconnect
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }

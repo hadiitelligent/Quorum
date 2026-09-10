@@ -105,6 +105,9 @@ insert into public.chat_messages (person_id, advisor_id, role, content) values
   ('00000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'user', 'Should we raise?'),
   ('00000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', 'user', 'Private question.');
 
+insert into public.oauth_clients (id, name, redirect_uris) values ('client-1', 'Claude', '{https://claude.ai/api/mcp/auth_callback}');
+insert into public.oauth_tokens (token_hash, kind, client_id, person_id, expires_at) values ('h1', 'access', 'client-1', '00000000-0000-0000-0000-000000000001', now() + interval '1 day');
+
 insert into public.sessions (id, person_id, question, brief, advisor_ids) values
   ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'Series B now or in 12 months?', 'Runway 14 months, 2.1x NRR.',
    '{a0000000-0000-0000-0000-000000000001,a0000000-0000-0000-0000-000000000002}');
@@ -279,6 +282,11 @@ select t.check_denied(
   $q$ delete from public.sessions where id = '50000000-0000-0000-0000-000000000001' $q$,
   'a session cannot be deleted');
 
+-- --- 3b. the connector's tables belong to the server ---------------------------
+select t.become('00000000-0000-0000-0000-000000000001');
+select t.check_denied('select * from public.oauth_tokens', 'an admin cannot read the connector tokens');
+select t.check_denied('select * from public.oauth_clients', 'an admin cannot read the connector clients');
+
 -- --- 4. a deactivated person sees nothing ------------------------------------
 select t.become('00000000-0000-0000-0000-000000000004');
 select t.check_rowcount('select * from public.advisors', 0, 'a deactivated person sees no advisors');
@@ -299,6 +307,7 @@ select t.check_denied('select * from public.sessions',           'anon cannot re
 select t.check_denied('select * from public.session_views',      'anon cannot read views');
 select t.check_denied('select * from public.session_votes',      'anon cannot read votes');
 select t.check_denied('select * from public.session_questions',  'anon cannot read questions');
+select t.check_denied('select * from public.oauth_tokens',       'anon cannot read the connector tokens');
 
 reset role;
 \o

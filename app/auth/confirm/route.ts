@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { isOnRoster } from '@/lib/auth'
@@ -13,6 +14,16 @@ import { appUrl } from '@/lib/env'
  * no explanation. Learned in EQFlow; kept here.
  */
 export const dynamic = 'force-dynamic'
+
+/** Where to go after sign-in: the path the middleware remembered, if it is a safe relative one; else home. */
+async function nextPath(): Promise<string> {
+  const store = await cookies()
+  const raw = store.get('quorum.next')?.value ?? ''
+  try {
+    store.delete('quorum.next')
+  } catch {}
+  return /^\/(?!\/)[^\s]*$/.test(raw) ? raw : '/'
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -35,7 +46,7 @@ export async function GET(request: Request) {
       await supabase.auth.signOut()
       return NextResponse.redirect(`${appUrl()}/login?error=not_on_roster`)
     }
-    return NextResponse.redirect(`${appUrl()}/`)
+    return NextResponse.redirect(`${appUrl()}${await nextPath()}`)
   }
 
   return new NextResponse(FRAGMENT_HANDOFF, {
@@ -77,7 +88,7 @@ export async function POST(request: Request) {
     await supabase.auth.signOut()
     return NextResponse.json({ message: 'That account cannot sign in here.' }, { status: 403 })
   }
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, next: await nextPath() })
 }
 
 const FRAGMENT_HANDOFF = `<!doctype html>
@@ -113,7 +124,7 @@ const FRAGMENT_HANDOFF = `<!doctype html>
   })
     .then(function (response) {
       if (!response.ok) { return response.json().then(function (b) { failed(b.message); }); }
-      window.location.replace('/');
+      return response.json().then(function (b) { window.location.replace(b.next || '/'); });
     })
     .catch(function () { failed('We could not reach the server.'); });
 })();

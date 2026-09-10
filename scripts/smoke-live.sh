@@ -43,6 +43,10 @@ check "advisors refuse anonymous"       "$BASE/api/advisors"            401
 check "new persona refuses anonymous"   "$BASE/api/advisors"            401 POST
 check "convene refuses anonymous"       "$BASE/api/sessions"            401 POST
 check "demo is behind sign-in in production" "$BASE/demo"                   307
+check "connector metadata"              "$BASE/.well-known/oauth-authorization-server" 200
+check "resource metadata"               "$BASE/.well-known/oauth-protected-resource/api/mcp" 200
+check "connector refuses anonymous"     "$BASE/api/mcp"                 401 POST
+check "approval page needs sign-in"     "$BASE/oauth/authorize"         307
 check "root redirects to login"         "$BASE/"                        307
 
 echo ""

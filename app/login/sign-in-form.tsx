@@ -60,13 +60,13 @@ export function SignInForm() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email: email.trim().toLowerCase(), token: code }),
     })
+    const body = (await res.json().catch(() => ({}))) as { message?: string; next?: string }
     if (!res.ok) {
-      const body = (await res.json().catch(() => ({}))) as { message?: string }
       setError(body.message ?? 'That code did not work.')
       setState('sent')
       return
     }
-    window.location.replace('/')
+    window.location.replace(body.next || '/')
   }
 
   if (state === 'sent' || state === 'checking') {
