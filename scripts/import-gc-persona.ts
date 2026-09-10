@@ -37,6 +37,7 @@ type Library = {
   aggression_dial: Record<string, string>
   evidence_levels: Record<string, string>
   basis_tags: Record<string, string>
+  decision_journal_schema: Record<string, unknown>
   improvement_procedure: string[]
   changelog: { version: string; date: string; notes: string }[]
   rule_count: number
@@ -129,6 +130,12 @@ put(
     '## How the persona improves',
     '',
     ...lib.improvement_procedure.map((s, i) => `${i + 1}. ${s}`),
+    '',
+    '## Decision journal — the record of each intervention (GC-Q06)',
+    '',
+    '```json',
+    JSON.stringify(lib.decision_journal_schema, null, 2),
+    '```',
     '',
     '## Changelog',
     '',

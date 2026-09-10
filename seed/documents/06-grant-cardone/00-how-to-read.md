@@ -61,6 +61,45 @@ Fixed — a guardrail; cannot be overridden by any aggression setting or scoreca
 5. Board feedback tags adjust the voice layer only.
 6. Re-run the §9 test scenarios of the spec after any change; a rule change that flips a scenario answer must be justified in the changelog.
 
+## Decision journal — the record of each intervention (GC-Q06)
+
+```json
+{
+  "entry_id": "string",
+  "date": "ISO date",
+  "company": "string",
+  "item": "one-line description of the decision",
+  "rules_fired": [
+    "rule ids"
+  ],
+  "vote": "yes_bigger | yes_condition | no",
+  "conviction": "1–10",
+  "scorecard": {
+    "enterprise_value": "1–10",
+    "reputation": "1–10",
+    "cash_flow_liquidity": "1–10",
+    "people_culture": "1–10",
+    "weighted": "float"
+  },
+  "gate_results": {
+    "downside": "pass|fail",
+    "guardrails": "pass|fail"
+  },
+  "flip_condition": "the number/evidence GC said would change its vote",
+  "board_decision": "what the board actually did",
+  "feedback_tag": "useful | noise | wrong_tone | null",
+  "outcome_90d": {
+    "tag": "right | wrong | too_early | null",
+    "note": "string"
+  },
+  "outcome_12m": {
+    "tag": "right | wrong | too_early | null",
+    "note": "string",
+    "direction_error": "bool — was the call wrong in direction, not just size? (GC-A11)"
+  }
+}
+```
+
 ## Changelog
 
 - v2.0 (2026-09-10): Audit pass: dial-10 values clamped under fixed rules (F03, M01, P03, B12, B11, B02, E01); G02 given a dial; N05 made fixed; bases/grades retagged (F03→GOV, H10/K03→C, M05→BOTH, P01/Q03/Q05→GOV, A11/B12/N08/Q10→B, C11/D07/E01/H06/I01→BOTH); merged E10→N07, I03→C11, K01→D07, E08→N06 (IDs retired, not reused). Merged v1 constitution/evidence base with the 172-rule comparison library. Deduplicated to a single library with SAYS/DOES/BOTH/GOV basis tags, A/B/C grades, a real aggression dial on the rules it affects, fixed guardrails, DOES-side evidence (E-series) and lifecycle fields for continuous improvement.
