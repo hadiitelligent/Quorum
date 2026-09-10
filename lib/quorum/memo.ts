@@ -55,6 +55,16 @@ export function sessionMemo(session: Session, opts: { boardName?: string; now?: 
       lines.push('')
     }
   }
+  if (session.questions.length) {
+    lines.push('## The board asked')
+    lines.push('')
+    for (const q of session.questions) {
+      lines.push(`**${q.name}:** ${q.question}`)
+      lines.push('')
+      lines.push(q.answer.trim() ? `> ${q.answer.trim().replace(/\n/g, '\n> ')}` : '> _(not answered)_')
+      lines.push('')
+    }
+  }
   if (session.challenges.length) {
     lines.push('## Challenge round')
     lines.push('')

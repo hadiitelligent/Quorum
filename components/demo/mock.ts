@@ -84,6 +84,9 @@ export function installDemo(): DemoStore {
       const kind = ({ views: 'view', challenges: 'challenge', votes: 'vote' } as const)[m[2] as 'views' | 'challenges' | 'votes']
       return json({ session: await store.step(m[1], { kind, advisorId: m[3] } as NextStep) })
     }
+    if ((m = path.match(/^\/api\/sessions\/([^/]+)\/answers$/)) && method === 'POST') {
+      return json({ session: store.answer(m[1], (body.answers as Record<string, string>) ?? {}) })
+    }
     if ((m = path.match(/^\/api\/sessions\/([^/]+)\/(synthesis|complete)$/)) && method === 'POST') {
       return json({ session: await store.step(m[1], { kind: m[2] as 'synthesis' | 'complete' }) })
     }

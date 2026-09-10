@@ -1,4 +1,4 @@
-import type { Advisor, SessionChallenge, SessionView } from '@/lib/quorum/types'
+import type { Advisor, SessionChallenge, SessionQuestion, SessionView } from '@/lib/quorum/types'
 
 /**
  * Every word the model is told, in one pure module with tests. The
@@ -93,15 +93,28 @@ export function viewPrompt(question: string, brief = ''): string {
     `"${question}"`,
     '',
     'Give your independent view. You have not seen — and must not guess at — what the other advisors think. Say what you would do and why, from your own domain, in 60 to 110 words of plain prose. Lead with the position.',
+    '',
+    'Then, if ONE specific thing only the client can tell you would change your view — a number, a date, a fact the brief does not give — ask it as "question": one sentence, concrete, answerable in a line or two. Otherwise "question" is null. Do not ask what the brief already answers.',
   ].join('\n')
 }
 
-export function challengePrompt(question: string, self: Pick<SessionView, 'advisorId' | 'name'>, views: SessionView[], brief = ''): string {
+/** The board's questions and the client's answers, as the later stages see them; empty string when none were asked. */
+export function answersBlock(questions: SessionQuestion[]): string {
+  if (questions.length === 0) return ''
+  return [
+    'After the independent views the board put questions to the client. The questions and the answers:',
+    '',
+    ...questions.map((q) => `${q.name} asked: ${q.question}\nClient: ${q.answer.trim() || '(not answered — proceed without it, and say what you assumed)'}`),
+  ].join('\n')
+}
+
+export function challengePrompt(question: string, self: Pick<SessionView, 'advisorId' | 'name'>, views: SessionView[], brief = '', questions: SessionQuestion[] = []): string {
   const others = views.filter((v) => v.advisorId !== self.advisorId)
   return [
     briefBlock(brief),
     '',
     `The question before the board: "${question}"`,
+    answersBlock(questions),
     '',
     'Every advisor has now given an independent view. Here they are, yours included:',
     '',
@@ -122,11 +135,12 @@ export const SYNTHESIS_SYSTEM = [
   '- Do not list the advisors or narrate the debate; the record already holds it. Write the decision.',
 ].join('\n')
 
-export function synthesisPrompt(question: string, views: SessionView[], challenges: SessionChallenge[], brief = ''): string {
+export function synthesisPrompt(question: string, views: SessionView[], challenges: SessionChallenge[], brief = '', questions: SessionQuestion[] = []): string {
   return [
     briefBlock(brief),
     '',
     `The question put to the board: "${question}"`,
+    answersBlock(questions),
     '',
     'Independent views:',
     '',
@@ -139,12 +153,13 @@ export function synthesisPrompt(question: string, views: SessionView[], challeng
     .join('\n')
 }
 
-export function votePrompt(question: string, recommendation: string, challenges: SessionChallenge[], self: Pick<SessionView, 'name'>, brief = ''): string {
+export function votePrompt(question: string, recommendation: string, challenges: SessionChallenge[], self: Pick<SessionView, 'name'>, brief = '', questions: SessionQuestion[] = []): string {
   const aimedAtMe = challenges.filter((c) => c.to === self.name)
   return [
     briefBlock(brief),
     '',
     `The question put to the board: "${question}"`,
+    answersBlock(questions),
     '',
     'The board synthesis, as written by the secretary:',
     '',

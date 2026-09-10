@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { GROUNDING_CHAR_CAP, briefBlock, challengePrompt, groundingBlock, personaPrompt, synthesisPrompt, viewPrompt, votePrompt } from '../../lib/board/prompts'
+import { GROUNDING_CHAR_CAP, answersBlock, briefBlock, challengePrompt, groundingBlock, personaPrompt, synthesisPrompt, viewPrompt, votePrompt } from '../../lib/board/prompts'
 import type { Advisor } from '../../lib/quorum/types'
 
 const marcus: Advisor = {
@@ -78,4 +78,20 @@ test('the brief travels with every stage, and its absence is said out loud', () 
     assert.ok(p.indexOf('BRIEF-TEXT') < p.indexOf('Q?'), 'the brief comes before the question')
   }
   assert.match(viewPrompt('Q?'), /no written brief/)
+})
+
+test('the answers travel to the later stages; an unanswered question says so', () => {
+  assert.equal(answersBlock([]), '')
+  const qs = [
+    { advisorId: 'b', name: 'Elena Vasquez', initials: 'EV', question: 'Lost deals?', answer: 'Price, twice.' },
+    { advisorId: 'c', name: 'James Whitfield', initials: 'JW', question: 'Indemnity cap?', answer: '' },
+  ]
+  const block = answersBlock(qs)
+  assert.match(block, /Elena Vasquez asked: Lost deals\?\nClient: Price, twice\./)
+  assert.match(block, /James Whitfield asked: Indemnity cap\?\nClient: \(not answered/)
+  const views = [{ advisorId: 'a', name: 'Marcus Chen', initials: 'MC', role: 'F', view: 'Now.' }, { advisorId: 'b', name: 'Elena Vasquez', initials: 'EV', role: 'G', view: 'Wait.' }]
+  assert.match(challengePrompt('Q?', views[0], views, '', qs), /Client: Price, twice\./)
+  assert.match(synthesisPrompt('Q?', views, [], '', qs), /Client: Price, twice\./)
+  assert.match(votePrompt('Q?', 'Do it.', [], { name: 'Marcus Chen' }, '', qs), /Client: Price, twice\./)
+  assert.match(viewPrompt('Q?'), /"question" is null/)
 })

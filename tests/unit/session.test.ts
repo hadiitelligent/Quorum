@@ -13,6 +13,8 @@ function session(over: Partial<Session> = {}): Session {
     brief: '',
     advisorIds: [],
     status: 'views',
+    questions: [],
+    questionsClosed: false,
     stage: 1,
     recommendation: '',
     error: '',
@@ -135,4 +137,25 @@ test('updatePrompt carries the current brief and asks for a what-changed section
   assert.equal(briefAgeDays(null), null)
   assert.equal(briefAgeDays('2026-09-01T10:00:00Z', new Date('2026-09-10T09:00:00Z')), 8)
   assert.equal(briefAgeDays('nonsense'), null)
+})
+
+test('questions pause the session after the views until the client closes them', () => {
+  const views = [view('a'), view('b'), view('c')]
+  const q = { advisorId: 'b', name: 'B', initials: 'B', question: 'What did the last three lost deals say?', answer: '' }
+  assert.deepEqual(nextSteps(session({ views, questions: [q] }), roster), [{ kind: 'answer' }])
+  assert.deepEqual(nextSteps(session({ views, questions: [q], questionsClosed: true }), roster).map((s) => s.kind), ['challenge', 'challenge', 'challenge'])
+  assert.equal(statusFor({ rosterSize: 3, views: 3, questionsOpen: true, challenges: 0, recommendation: false, votes: 0 }), 'questions')
+  assert.equal(statusFor({ rosterSize: 3, views: 3, questionsOpen: false, challenges: 0, recommendation: false, votes: 0 }), 'challenges')
+  assert.equal(statusFor({ rosterSize: 3, views: 2, questionsOpen: true, challenges: 0, recommendation: false, votes: 0 }), 'views')
+  assert.equal(stageOf('questions', { views: 3, challenges: 0, recommendation: false }), 1)
+})
+
+test('mergeSession keeps the closed answers over an open snapshot', async () => {
+  const { mergeSession } = await import('../../lib/quorum/session')
+  const open = session({ status: 'questions', questions: [{ advisorId: 'b', name: 'B', initials: 'B', question: 'Q?', answer: '' }] })
+  const closed = session({ status: 'challenges', questions: [{ advisorId: 'b', name: 'B', initials: 'B', question: 'Q?', answer: 'Price.' }], questionsClosed: true })
+  const m = mergeSession(open, closed)
+  assert.equal(m.questionsClosed, true)
+  assert.equal(m.questions[0].answer, 'Price.')
+  assert.equal(m.status, 'challenges')
 })

@@ -12,7 +12,7 @@ import { fromPostgrestError } from '@/lib/api-errors'
 import { ApiError } from '@/lib/errors'
 import { activeRoster, boardContext, personaSystem } from './context'
 import { SYNTHESIS_SYSTEM, challengePrompt, synthesisPrompt, viewPrompt, votePrompt } from './prompts'
-import { callJson, callText } from './model'
+import { callJson } from './model'
 
 /**
  * The convene orchestration (spec §3), one stage per function. The client
@@ -34,7 +34,14 @@ import { callJson, callText } from './model'
 type Ctx = { db: Db; person: PersonRow }
 
 async function refreshStatus(db: Db, session: Session, rosterSize: number): Promise<Session> {
-  const next = statusFor({ rosterSize, views: session.views.length, challenges: session.challenges.length, recommendation: Boolean(session.recommendation), votes: session.votes.length })
+  const next = statusFor({
+    rosterSize,
+    views: session.views.length,
+    questionsOpen: session.questions.length > 0 && !session.questionsClosed,
+    challenges: session.challenges.length,
+    recommendation: Boolean(session.recommendation),
+    votes: session.votes.length,
+  })
   if (next !== session.status && session.status !== 'done' && session.status !== 'failed') {
     await updateSessionRow(db, session.id, { status: next, ...(next === 'done' ? { completed_at: new Date().toISOString() } : {}) })
     return loadSession(db, session.id)
@@ -84,10 +91,15 @@ export async function runView({ db, person }: Ctx, sessionId: string, advisorId:
     const advisor = await getAdvisor(db, advisorId)
     const system = await personaSystem(db, advisor, boardContext(person, roster))
     const out = await failing(db, sessionId, 'independent views', () =>
-      callText({ model: advisorModel(), system, messages: [{ role: 'user', content: viewPrompt(session.question, session.brief) }], effort: 'medium' }),
+      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: viewPrompt(session.question, session.brief) }], effort: 'medium' }, VIEW),
     )
-    const { error } = await db.from('session_views').insert({ session_id: sessionId, advisor_id: advisorId, advisor_name: advisor.name, advisor_role: advisor.role, view: out.text, model: out.model })
+    const { error } = await db.from('session_views').insert({ session_id: sessionId, advisor_id: advisorId, advisor_name: advisor.name, advisor_role: advisor.role, view: out.data.view.trim(), model: out.model })
     if (error && error.code !== '23505') throw fromPostgrestError(error)
+    const question = out.data.question?.trim()
+    if (question && !error) {
+      const { error: qError } = await db.from('session_questions').insert({ session_id: sessionId, advisor_id: advisorId, advisor_name: advisor.name, question })
+      if (qError && qError.code !== '23505') throw fromPostgrestError(qError)
+    }
     session = await loadSession(db, sessionId)
   }
   return refreshStatus(db, session, roster.length)
@@ -98,6 +110,7 @@ export async function runChallenge({ db, person }: Ctx, sessionId: string, advis
   let session = await loadSession(db, sessionId)
   assertDriver(session, person, row)
   const roster = await sessionRoster(db, session)
+  if (session.questions.length > 0 && !session.questionsClosed) throw new ApiError('The board is waiting for the client to answer its questions.', 409)
   const self = session.views.find((v) => v.advisorId === advisorId)
   if (!self) throw new ApiError('That advisor has not given a view yet.', 409)
   const others = session.views.filter((v) => v.advisorId !== advisorId)
@@ -110,7 +123,7 @@ export async function runChallenge({ db, person }: Ctx, sessionId: string, advis
       challenge: z.string().min(1),
     })
     const out = await failing(db, sessionId, 'the challenge round', () =>
-      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: challengePrompt(session.question, self, session.views, session.brief) }], effort: 'medium' }, schema),
+      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: challengePrompt(session.question, self, session.views, session.brief, session.questions) }], effort: 'medium' }, schema),
     )
     const target = others.find((o) => o.advisorId === out.data.to)!
     const { error } = await db.from('session_challenges').insert({
@@ -134,6 +147,7 @@ export async function runSynthesis({ db, person }: Ctx, sessionId: string): Prom
   assertDriver(session, person, row)
   const roster = await sessionRoster(db, session)
   if (session.views.length < roster.length) throw new ApiError('The board has not finished its independent views.', 409)
+  if (session.questions.length > 0 && !session.questionsClosed) throw new ApiError('The board is waiting for the client to answer its questions.', 409)
   if (!session.recommendation) {
     const schema = z.object({ recommendation: z.string().min(1) })
     const out = await failing(db, sessionId, 'the synthesis', () =>
@@ -141,7 +155,7 @@ export async function runSynthesis({ db, person }: Ctx, sessionId: string): Prom
         {
           model: synthesisModel(),
           system: [{ text: SYNTHESIS_SYSTEM, cache: true }],
-          messages: [{ role: 'user', content: synthesisPrompt(session.question, session.views, session.challenges, session.brief) }],
+          messages: [{ role: 'user', content: synthesisPrompt(session.question, session.views, session.challenges, session.brief, session.questions) }],
           effort: 'high',
         },
         schema,
@@ -152,6 +166,11 @@ export async function runSynthesis({ db, person }: Ctx, sessionId: string): Prom
   }
   return refreshStatus(db, session, roster.length)
 }
+
+const VIEW = z.object({
+  view: z.string().min(1),
+  question: z.string().nullable(),
+})
 
 const VOTE = z.object({
   vote: z.enum(['agree', 'conditional', 'disagree']),
@@ -170,7 +189,7 @@ export async function runVote({ db, person }: Ctx, sessionId: string, advisorId:
     const advisor = await getAdvisor(db, advisorId)
     const system = await personaSystem(db, advisor, boardContext(person, roster))
     const out = await failing(db, sessionId, 'the vote', () =>
-      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: votePrompt(session.question, session.recommendation, session.challenges, self, session.brief) }], effort: 'medium' }, VOTE),
+      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: votePrompt(session.question, session.recommendation, session.challenges, self, session.brief, session.questions) }], effort: 'medium' }, VOTE),
     )
     const { error } = await db.from('session_votes').insert({
       session_id: sessionId,
@@ -195,5 +214,28 @@ export async function complete({ db, person }: Ctx, sessionId: string): Promise<
   const roster = await sessionRoster(db, session)
   const voted = new Set(session.votes.map((v) => v.advisorId))
   if (!roster.every((a) => voted.has(a.id))) throw new ApiError('Not every advisor has voted yet.', 409)
+  return refreshStatus(db, session, roster.length)
+}
+
+/**
+ * The client answers the board's questions (any subset; an empty answer is
+ * "not answered") and closes them; the session moves on. Idempotent once
+ * closed: the answers on the record are returned as they are.
+ */
+export async function answerQuestions({ db, person }: Ctx, sessionId: string, answers: Record<string, string>): Promise<Session> {
+  const row = await rowOf(db, sessionId)
+  let session = await loadSession(db, sessionId)
+  if (session.questionsClosed) return session
+  assertDriver(session, person, row)
+  const roster = await sessionRoster(db, session)
+  if (session.views.length < roster.length) throw new ApiError('The board has not finished its independent views.', 409)
+  for (const q of session.questions) {
+    const answer = (answers[q.advisorId] ?? '').trim()
+    if (answer === q.answer.trim()) continue
+    const { error } = await db.from('session_questions').update({ answer }).eq('session_id', sessionId).eq('advisor_id', q.advisorId)
+    if (error) throw fromPostgrestError(error)
+  }
+  await updateSessionRow(db, sessionId, { questions_closed_at: new Date().toISOString() })
+  session = await loadSession(db, sessionId)
   return refreshStatus(db, session, roster.length)
 }

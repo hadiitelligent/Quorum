@@ -395,6 +395,14 @@ textarea.input { min-height: 0; resize: vertical; line-height: 1.5; }
 .rows .row:last-child { background: none; }
 .rows .row b { font-weight: 500; white-space: nowrap; }
 
+/* — the board's questions (session) — */
+.qa { gap: var(--space-3); padding: var(--space-4); }
+.qa-list { display: flex; flex-direction: column; gap: var(--space-4); }
+.qa-item { display: flex; flex-direction: column; gap: var(--space-2); }
+.qa-q { display: flex; gap: 10px; }
+.qa-q .avatar { margin-top: 2px; }
+.qa-a { font-size: 13.5px; line-height: 1.55; padding: 8px 12px; border-radius: var(--radius-md); background: var(--color-accent-900); color: var(--color-accent-100); align-self: flex-start; max-width: 80ch; white-space: pre-wrap; }
+
 /* — 4. sessions — */
 .sessions { max-width: 900px; gap: var(--space-6); }
 

@@ -9,6 +9,8 @@ const done: Session = {
   brief: '',
   advisorIds: [],
   status: 'done',
+  questions: [{ advisorId: 'b', name: 'Elena Vasquez', initials: 'EV', question: 'What did the last three lost deals say?', answer: 'Price, twice.' }],
+  questionsClosed: true,
   stage: 3,
   recommendation: 'Begin the raise in ~8 weeks.',
   error: '',
@@ -33,6 +35,7 @@ test('the memo carries the synthesis, the alignment and the dissent verbatim', (
   assert.match(memo, /### Recorded dissent/)
   assert.match(memo, /> Both Q2 logos should close first\.\n> One invites concentration questions\./)
   assert.match(memo, /### Marcus Chen — Finance & Capital\n\nRaise now\./)
+  assert.match(memo, /## The board asked\n\n\*\*Elena Vasquez:\*\* What did the last three lost deals say\?\n\n> Price, twice\./)
   assert.match(memo, /\*\*Elena Vasquez → Marcus Chen:\*\* You are pricing fear\./)
   assert.ok(memo.endsWith('\n'))
 })

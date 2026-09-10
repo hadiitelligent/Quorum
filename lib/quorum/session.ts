@@ -7,7 +7,7 @@ import type { Session, SessionSummary, SessionVote } from './types'
  * what the Sessions table calls the outcome, and which votes are dissent.
  */
 
-export const STATUS_ORDER: SessionStatus[] = ['views', 'challenges', 'synthesis', 'votes', 'done', 'failed']
+export const STATUS_ORDER: SessionStatus[] = ['views', 'questions', 'challenges', 'synthesis', 'votes', 'done', 'failed']
 
 export const STAGE_LABELS = [
   { n: '01', label: 'Independent views' },
@@ -19,6 +19,7 @@ export const STAGE_LABELS = [
 export function stageOf(status: SessionStatus, counts: { views: number; challenges: number; recommendation: boolean }): 0 | 1 | 2 | 3 {
   if (counts.recommendation || status === 'synthesis' || status === 'votes' || status === 'done') return 3
   if (status === 'challenges' || counts.challenges > 0) return 2
+  if (status === 'questions') return 1
   if (status === 'views' || status === 'failed') return counts.views > 0 || status === 'views' ? 1 : 0
   return 1
 }
@@ -50,6 +51,8 @@ export function outcomeOf(
  */
 export type NextStep =
   | { kind: 'view'; advisorId: string }
+  /** The board is waiting on the client: nothing to run until they answer or proceed. */
+  | { kind: 'answer' }
   | { kind: 'challenge'; advisorId: string }
   | { kind: 'synthesis' }
   | { kind: 'vote'; advisorId: string }
@@ -62,6 +65,9 @@ export function nextSteps(session: Session, roster: { id: string }[]): NextStep[
   const viewed = new Set(session.views.map((v) => v.advisorId))
   const missingViews = ids.filter((id) => !viewed.has(id))
   if (missingViews.length) return missingViews.map((advisorId) => ({ kind: 'view', advisorId }))
+
+  // Questions asked and not yet closed: the client's move.
+  if (session.questions.length > 0 && !session.questionsClosed) return [{ kind: 'answer' }]
 
   // With one advisor there is nobody to challenge; the round is skipped.
   if (ids.length > 1) {
@@ -80,11 +86,12 @@ export function nextSteps(session: Session, roster: { id: string }[]): NextStep[
 }
 
 /** The status a session should carry once these rows exist — used by the routes after each write. */
-export function statusFor(counts: { rosterSize: number; views: number; challenges: number; recommendation: boolean; votes: number }): SessionStatus {
+export function statusFor(counts: { rosterSize: number; views: number; questionsOpen?: boolean; challenges: number; recommendation: boolean; votes: number }): SessionStatus {
   if (counts.recommendation && counts.votes >= counts.rosterSize) return 'done'
   if (counts.recommendation) return 'votes'
   const challengesDone = counts.rosterSize <= 1 || counts.challenges >= counts.rosterSize
   if (counts.views >= counts.rosterSize && challengesDone) return 'synthesis'
+  if (counts.views >= counts.rosterSize && counts.questionsOpen) return 'questions'
   if (counts.views >= counts.rosterSize) return 'challenges'
   return 'views'
 }
@@ -116,6 +123,8 @@ export function mergeSession(a: Session, b: Session): Session {
     error: a.error || b.error,
     completedAt: a.completedAt ?? b.completedAt,
     views: byKey([...a.views, ...b.views], (v) => v.advisorId),
+    questions: byKey([...(a.questionsClosed ? a.questions : b.questionsClosed ? b.questions : [...a.questions, ...b.questions])], (q) => q.advisorId),
+    questionsClosed: a.questionsClosed || b.questionsClosed,
     challenges: byKey([...a.challenges, ...b.challenges], (c) => c.fromId),
     votes: byKey([...a.votes, ...b.votes], (v) => v.advisorId),
   }

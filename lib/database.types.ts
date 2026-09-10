@@ -9,7 +9,7 @@
 
 type Timestamptz = string
 
-export type SessionStatus = 'views' | 'challenges' | 'synthesis' | 'votes' | 'done' | 'failed'
+export type SessionStatus = 'views' | 'questions' | 'challenges' | 'synthesis' | 'votes' | 'done' | 'failed'
 export type Vote = 'agree' | 'conditional' | 'disagree'
 export type Strength = { s: string; lv: number }
 
@@ -75,6 +75,7 @@ export type SessionRow = {
   brief: string
   advisor_ids: string[]
   status: SessionStatus
+  questions_closed_at: Timestamptz | null
   recommendation: string
   synthesis_model: string | null
   error: string
@@ -101,6 +102,16 @@ export type SessionChallengeRow = {
   to_name: string
   challenge: string
   model: string | null
+  created_at: Timestamptz
+}
+
+export type SessionQuestionRow = {
+  session_id: string
+  advisor_id: string
+  advisor_name: string
+  question: string
+  answer: string
+  answered_at: Timestamptz | null
   created_at: Timestamptz
 }
 
@@ -139,6 +150,7 @@ export type Database = {
       >
       session_views: Table<SessionViewRow, Omit<SessionViewRow, 'created_at' | 'model'> & Partial<Pick<SessionViewRow, 'model'>>>
       session_challenges: Table<SessionChallengeRow, Omit<SessionChallengeRow, 'created_at' | 'model'> & Partial<Pick<SessionChallengeRow, 'model'>>>
+      session_questions: Table<SessionQuestionRow, Pick<SessionQuestionRow, 'session_id' | 'advisor_id' | 'advisor_name' | 'question'> & Partial<Pick<SessionQuestionRow, 'answer'>>>
       session_votes: Table<SessionVoteRow, Omit<SessionVoteRow, 'created_at' | 'model'> & Partial<Pick<SessionVoteRow, 'model'>>>
     }
     Views: Record<string, never>

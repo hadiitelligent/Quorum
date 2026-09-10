@@ -94,8 +94,10 @@ unprivileged role (`supabase/tests/permissions.test.sql`).
 4. **Contributions are insert-only** — no update, no delete on views,
    challenges or votes. The vote's `statement` IS the recorded dissent.
 5. **`app.sessions_guard`**: the question, the brief and the roster never
-   change, the synthesis is written once, the status only moves forward,
-   done is final. `session_views_check`: a view comes from an invited advisor.
+   change, the synthesis is written once, the questions close once, the
+   status only moves forward, done is final. `session_views_check`: a view
+   comes from an invited advisor. `session_questions_guard`: a question on
+   the record never changes; answers are fixed once the questions close.
 6. **A vote needs a view and a written synthesis first; a challenge is
    aimed at an advisor who gave a view** (`session_votes_check`,
    `session_challenges_check`).

@@ -28,13 +28,14 @@ export async function getSessionRow(db: Db, id: string): Promise<SessionRow> {
 /** The whole record: the row plus every contribution, in the order they landed. */
 export async function loadSession(db: Db, id: string): Promise<Session> {
   const row = await getSessionRow(db, id)
-  const [views, challenges, votes, person] = await Promise.all([
+  const [views, questions, challenges, votes, person] = await Promise.all([
     db.from('session_views').select('*').eq('session_id', id).order('created_at'),
+    db.from('session_questions').select('*').eq('session_id', id).order('created_at'),
     db.from('session_challenges').select('*').eq('session_id', id).order('created_at'),
     db.from('session_votes').select('*').eq('session_id', id).order('created_at'),
     db.from('people').select('name').eq('id', row.person_id).maybeSingle(),
   ])
-  for (const r of [views, challenges, votes]) if (r.error) throw fromPostgrestError(r.error)
+  for (const r of [views, questions, challenges, votes]) if (r.error) throw fromPostgrestError(r.error)
   const session: Session = {
     id: row.id,
     question: row.question,
@@ -49,6 +50,8 @@ export async function loadSession(db: Db, id: string): Promise<Session> {
     createdAt: row.created_at,
     completedAt: row.completed_at,
     views: (views.data ?? []).map((v) => ({ advisorId: v.advisor_id, name: v.advisor_name, initials: initials(v.advisor_name), role: v.advisor_role, view: v.view })),
+    questions: (questions.data ?? []).map((q) => ({ advisorId: q.advisor_id, name: q.advisor_name, initials: initials(q.advisor_name), question: q.question, answer: q.answer })),
+    questionsClosed: row.questions_closed_at !== null,
     challenges: (challenges.data ?? []).map((c) => ({ fromId: c.from_advisor_id, toId: c.to_advisor_id, from: c.from_name, fi: initials(c.from_name), to: c.to_name, text: c.challenge })),
     votes: (votes.data ?? []).map((v) => ({ advisorId: v.advisor_id, name: v.advisor_name, initials: initials(v.advisor_name), vote: v.vote, statement: v.statement })),
   }
@@ -70,7 +73,7 @@ export async function listSessions(db: Db, limit = 100): Promise<SessionSummary[
   })
 }
 
-export async function updateSessionRow(db: Db, id: string, patch: Partial<Pick<SessionRow, 'status' | 'recommendation' | 'synthesis_model' | 'error' | 'completed_at'>>): Promise<void> {
+export async function updateSessionRow(db: Db, id: string, patch: Partial<Pick<SessionRow, 'status' | 'recommendation' | 'synthesis_model' | 'error' | 'completed_at' | 'questions_closed_at'>>): Promise<void> {
   const { data, error } = await db.from('sessions').update(patch).eq('id', id).select('id').maybeSingle()
   if (error) throw fromPostgrestError(error)
   if (!data) throw new ApiError('Only the person who convened the board drives its session.', 403)

@@ -117,6 +117,16 @@ the pasted Meridian brief was read into the dashboard in 22 s (after one
 fix — the insight schema was too large for the API's output grammar, so
 the extraction now asks for plain JSON and validates it).
 
+**2026-09-10, night — the board's questions.** With its independent view
+each advisor may ask the client one specific question (the view call is now
+structured: `{ view, question|null }`). When every view is in and any
+question was asked, the session pauses at status `questions`: the convener
+sees "The board has questions for you", answers what they can (or proceeds
+without answering), and the answers go on the record (`session_questions`,
+fixed once closed — tested) and into the challenge, synthesis and vote
+prompts. Others watching see "waiting for the client". The memo carries the
+questions and answers.
+
 ## Not yet verified
 
 - **Sign-in by email.** Production sign-in was done with a minted link

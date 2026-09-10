@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, CircleNotch, DownloadSimple, SealCheck } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, CircleNotch, DownloadSimple, Question, SealCheck } from '@phosphor-icons/react'
 import type { Advisor, Session } from '@/lib/quorum/types'
 import { STAGE_LABELS, VOTE_LABELS, dissentOf, mergeSession, nextSteps, rosterFor } from '@/lib/quorum/session'
 import { memoFilename, sessionMemo } from '@/lib/quorum/memo'
@@ -24,6 +24,8 @@ export function SessionView({ id }: { id: string }) {
   const [active, setActive] = useState<Advisor[] | null>(null)
   const roster = session && active ? rosterFor(session, active) : null
   const [error, setError] = useState<string | null>(null)
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [answering, setAnswering] = useState(false)
   const running = useRef(false)
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export function SessionView({ id }: { id: string }) {
     if (!session || !roster || running.current) return
     if (session.personId !== person.id) return
     const steps = nextSteps(session, roster)
-    if (steps.length === 0 || steps[0].kind === 'nothing') return
+    if (steps.length === 0 || steps[0].kind === 'nothing' || steps[0].kind === 'answer') return
     running.current = true
     let cancelled = false
     ;(async () => {
@@ -71,9 +73,20 @@ export function SessionView({ id }: { id: string }) {
     }
   }, [session, roster, person.id, id, merge])
 
+  async function sendAnswers(skip: boolean) {
+    if (!session || answering) return
+    setAnswering(true)
+    setError(null)
+    const r = await api.sessions.answer(session.id, skip ? {} : answers)
+    setAnswering(false)
+    if (r.ok) merge(r.data.session)
+    else setError(r.message)
+  }
+
   const live = session && session.status !== 'done' && session.status !== 'failed'
   const rosterSize = roster?.length ?? 0
   const formingViews = live && session.views.length < rosterSize
+  const asking = live && session.questions.length > 0 && !session.questionsClosed && session.views.length >= rosterSize
   const debating = live && session.stage === 2 && rosterSize > 1 && session.challenges.length < rosterSize
   const writing = live && session.status === 'synthesis' && !session.recommendation
   const voting = live && Boolean(session?.recommendation) && (session?.votes.length ?? 0) < rosterSize
@@ -146,6 +159,59 @@ export function SessionView({ id }: { id: string }) {
         <div className="status-line">
           <CircleNotch size={15} className="pulse" />
           Advisors are forming independent views — none can see the others&rsquo; yet.
+        </div>
+      )}
+
+      {session.questions.length > 0 && (asking || session.questionsClosed) && (
+        <div className={`card ${asking ? 'elev-md' : 'elev-sm'} qa fade-up-45`}>
+          <div className="synth-head">
+            <Question size={17} color="var(--color-accent)" />
+            <span className="kicker">{asking ? 'The board has questions for you' : 'The board asked'}</span>
+          </div>
+          {asking && session.personId === person.id && (
+            <div className="help">Answer what you can — a line or two each. The challenge round and the synthesis will use your answers. Leave one blank if you do not know.</div>
+          )}
+          <div className="qa-list">
+            {session.questions.map((q) => (
+              <div className="qa-item" key={q.advisorId}>
+                <div className="qa-q">
+                  <Avatar initials={q.initials} size={26} tone="neutral" />
+                  <div>
+                    <div className="exchange-who">{q.name} asks</div>
+                    <div className="exchange-text">{q.question}</div>
+                  </div>
+                </div>
+                {asking && session.personId === person.id ? (
+                  <textarea
+                    className="input"
+                    rows={2}
+                    value={answers[q.advisorId] ?? ''}
+                    onChange={(e) => setAnswers((a) => ({ ...a, [q.advisorId]: e.target.value }))}
+                    placeholder="Your answer"
+                    aria-label={`Answer to ${q.name}`}
+                  />
+                ) : (
+                  <div className="qa-a">{q.answer.trim() ? q.answer : <span className="help">Not answered.</span>}</div>
+                )}
+              </div>
+            ))}
+          </div>
+          {asking && session.personId === person.id && (
+            <div className="synth-actions">
+              <button className="btn btn-primary" onClick={() => sendAnswers(false)} disabled={answering}>
+                {answering ? 'Sending…' : 'Send answers to the board'}
+              </button>
+              <button className="btn btn-secondary" onClick={() => sendAnswers(true)} disabled={answering}>
+                Proceed without answering
+              </button>
+            </div>
+          )}
+          {asking && session.personId !== person.id && (
+            <div className="status-line">
+              <CircleNotch size={15} className="pulse" />
+              Waiting for {session.convenedBy} to answer.
+            </div>
+          )}
         </div>
       )}
 
@@ -235,7 +301,7 @@ export function SessionView({ id }: { id: string }) {
         </div>
       )}
       {error && session.status !== 'failed' && <div className="msg warn">{error}</div>}
-      {live && session.personId !== person.id && (
+      {live && !asking && session.personId !== person.id && (
         <div className="status-line">
           <CircleNotch size={15} className="pulse" />
           {session.convenedBy} convened this session; it continues from their screen.

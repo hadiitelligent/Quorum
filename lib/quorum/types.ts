@@ -44,6 +44,7 @@ export type ChatMessage = {
 
 export type SessionView = { advisorId: string; name: string; initials: string; role: string; view: string }
 export type SessionChallenge = { fromId: string; toId: string; from: string; fi: string; to: string; text: string }
+export type SessionQuestion = { advisorId: string; name: string; initials: string; question: string; answer: string }
 export type SessionVote = { advisorId: string; name: string; initials: string; vote: Vote; statement: string }
 
 export type Session = {
@@ -64,6 +65,10 @@ export type Session = {
   createdAt: string
   completedAt: string | null
   views: SessionView[]
+  /** The board's questions for the client, asked with the views. */
+  questions: SessionQuestion[]
+  /** True once the convener answered or proceeded; the answers are then fixed. */
+  questionsClosed: boolean
   challenges: SessionChallenge[]
   votes: SessionVote[]
 }

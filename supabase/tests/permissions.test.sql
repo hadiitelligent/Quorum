@@ -227,6 +227,26 @@ select t.check_denied(
   $q$ insert into public.session_challenges (session_id, from_advisor_id, to_advisor_id, from_name, to_name, challenge)
       values ('50000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'M', 'M', 'x') $q$,
   'an advisor cannot challenge themself');
+-- the board's questions: the convener answers, then they close
+insert into public.session_questions (session_id, advisor_id, advisor_name, question) values
+  ('50000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'Elena Vasquez', 'What did the last three lost deals say?');
+update public.session_questions set answer = 'Price, twice; a missing integration once.' where session_id = '50000000-0000-0000-0000-000000000001';
+select t.check_eq((select answered_at is not null from public.session_questions where session_id = '50000000-0000-0000-0000-000000000001'), true, 'an answer is stamped by the database');
+select t.check_denied(
+  $q$ update public.session_questions set question = 'a different question' where session_id = '50000000-0000-0000-0000-000000000001' $q$,
+  'a question on the record cannot be changed', 'cannot be changed');
+select t.become('00000000-0000-0000-0000-000000000003');
+select t.check_affected(
+  $q$ update public.session_questions set answer = 'not mine' where session_id = '50000000-0000-0000-0000-000000000001' $q$,
+  0, 'somebody else cannot answer the board''s questions');
+select t.become('00000000-0000-0000-0000-000000000002');
+update public.sessions set status = 'questions', questions_closed_at = now() where id = '50000000-0000-0000-0000-000000000001';
+select t.check_denied(
+  $q$ update public.session_questions set answer = 'changed later' where session_id = '50000000-0000-0000-0000-000000000001' $q$,
+  'answers are fixed once the questions close', 'closed');
+select t.check_denied(
+  $q$ update public.sessions set questions_closed_at = null where id = '50000000-0000-0000-0000-000000000001' $q$,
+  'questions close once', 'closed');
 insert into public.session_challenges (session_id, from_advisor_id, to_advisor_id, from_name, to_name, challenge) values
   ('50000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'Elena Vasquez', 'Marcus Chen', 'You are pricing fear.');
 update public.sessions set status = 'challenges' where id = '50000000-0000-0000-0000-000000000001';
@@ -278,6 +298,7 @@ select t.check_denied('select * from public.briefs',             'anon cannot re
 select t.check_denied('select * from public.sessions',           'anon cannot read sessions');
 select t.check_denied('select * from public.session_views',      'anon cannot read views');
 select t.check_denied('select * from public.session_votes',      'anon cannot read votes');
+select t.check_denied('select * from public.session_questions',  'anon cannot read questions');
 
 reset role;
 \o
