@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "quorum",
+  // No scheduled jobs on this app, so the generated OpenNext worker is the
+  // entry point directly. ITelliBuilder wraps it in worker.ts to add a
+  // scheduled() handler; if Quorum ever needs a cron, copy that shape.
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-01",
+  // nodejs_compat: Next 16 needs Node built-ins on the Worker.
+  // global_fetch_strictly_public: fetch() to our own hostname goes out over the
+  //   public internet instead of looping back internally, which is what the
+  //   Supabase and Anthropic clients expect.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  // The *.workers.dev hostname is per ACCOUNT. A custom domain is a one-line
+  // "routes" entry here once the zone is on Cloudflare — see docs/deployment.md.
+  // APP_URL changes in step with it.
+  "workers_dev": true,
+
+  // Per-version preview URLs OFF: each one is a live hostname running this code
+  // against the PRODUCTION database. `wrangler versions upload` still works
+  // when a preview is genuinely wanted.
+  "preview_urls": false,
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "quorum"
+    }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}

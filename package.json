@@ -1,0 +1,52 @@
+{
+  "name": "quorum",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "seed": "node --conditions=react-server --import tsx scripts/seed.ts",
+    "db:push": "bash scripts/db-push.sh",
+    "db:test": "bash scripts/db-test.sh",
+    "test:unit": "node --conditions=react-server --import tsx --test tests/unit/*.test.ts",
+    "signin": "node --conditions=react-server --import tsx scripts/dev-signin.ts",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "preflight": "bash scripts/preflight.sh",
+    "predeploy": "bash scripts/preflight.sh",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "postdeploy": "bash scripts/smoke-live.sh",
+    "smoke:live": "bash scripts/smoke-live.sh",
+    "deploy:secrets": "bash scripts/deploy-secrets.sh",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.121.0",
+    "@phosphor-icons/react": "^2.1.7",
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
+    "next": "^16.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.3",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "dotenv": "^17.4.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.2",
+    "supabase": "^2.116.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.126.0"
+  }
+}

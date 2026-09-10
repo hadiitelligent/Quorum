@@ -1,0 +1,52 @@
+# Supabase project settings as code — pushed with `npx supabase config push`
+# after `npx supabase link`. Only the parts that matter are set; everything
+# else keeps Supabase's defaults. Two traps learned in EQFlow are recorded
+# inline below.
+project_id = "quorum"
+
+[auth]
+# The origin every emailed sign-in link is built from. Localhost here means
+# every magic link mailed to a person opens nothing on their phone.
+site_url = "https://quorum.itelligents.workers.dev"
+additional_redirect_urls = [
+  "https://quorum.itelligents.workers.dev/auth/confirm",
+  "https://quorum.itelligents.workers.dev/auth/callback",
+  "http://localhost:3000/auth/confirm",
+  "http://localhost:3000/auth/callback",
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+# OFF: accounts are provisioned by `npm run seed` through the admin API.
+# Sign-in is a magic link for an account that already exists.
+enable_signup = false
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+[auth.rate_limit]
+email_sent = 2
+
+[auth.email]
+# MUST STAY TRUE. Despite the name this is the on/off switch for the whole
+# email provider; false makes every magic link fail with "Email logins are
+# disabled". New accounts are blocked by enable_signup above, by
+# shouldCreateUser: false in the sign-in form, and by the roster check.
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+# The template ships "1s", a local-development value that lets anyone who
+# knows an address flood that inbox. 60s.
+max_frequency = "60s"
+otp_length = 8
+# Three hours. A sign-in link is read on a phone, often hours after it was
+# sent; a one-hour link expires before the person opens it.
+otp_expiry = 10800
+
+# The link carries the token itself (token_hash), so it works in ANY browser
+# — the default {{ .ConfirmationURL }} is a PKCE flow that only completes in
+# the browser that asked for the link, and a link opened from the Gmail app
+# or another device loops back to the sign-in page. The 8-digit code is the
+# fallback for a link a mail scanner has already followed.
+[auth.email.template.magic_link]
+subject = "Sign in to Quorum"
+content_path = "./supabase/templates/magic_link.html"
