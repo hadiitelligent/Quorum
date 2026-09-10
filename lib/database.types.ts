@@ -59,6 +59,15 @@ export type ChatMessageRow = {
   created_at: Timestamptz
 }
 
+export type BriefRow = {
+  person_id: string
+  content: string
+  insight: Record<string, unknown>
+  insight_model: string | null
+  insight_error: string
+  updated_at: Timestamptz
+}
+
 export type SessionRow = {
   id: string
   person_id: string
@@ -123,6 +132,7 @@ export type Database = {
         ChatMessageRow,
         Pick<ChatMessageRow, 'person_id' | 'advisor_id' | 'role' | 'content'> & Partial<Pick<ChatMessageRow, 'id' | 'model'>>
       >
+      briefs: Table<BriefRow, Pick<BriefRow, 'person_id' | 'content'> & Partial<Pick<BriefRow, 'insight' | 'insight_model' | 'insight_error'>>>
       sessions: Table<
         SessionRow,
         Pick<SessionRow, 'person_id' | 'question'> & Partial<Omit<SessionRow, 'person_id' | 'question' | 'created_at' | 'updated_at'>>

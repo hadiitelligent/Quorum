@@ -97,6 +97,23 @@ session contributions stay attached; the old 18 documents were removed by
 the seed. Its instructions are the constitution's drop-in system prompt,
 condensed, with the honesty line ("not him, not endorsed by him") kept.
 
+**2026-09-10, evening — the Business page.** The brief became a *standing
+brief* per person (`briefs` table, private like a chat; convening copies it
+onto the session, and private chats read it too). A new **Business** page
+owns it: on first sign-in (no brief yet, the board redirects there) it walks
+the client through copying the prompt into their own Claude, running it,
+and pasting the brief; saving it extracts an **insight** (one structured
+Opus 5 call, `lib/board/insight.ts`, schema in `lib/quorum/insight.ts`) and
+renders the dashboard — overview, business worth, assets held and what is
+owed, cash, burn and runway, monthly overheads, revenue, targets for the
+year, the pipeline with a weighted value, and what the brief does not say.
+Later visits show the dashboard and an **update prompt** that carries the
+current brief and asks their Claude to rewrite it with a "what changed"
+section. The full-brief prompt now covers assets, liabilities, goals and
+targets and the pipeline explicitly; the cap rose to 60k characters. The
+board's convene panel just says how fresh the brief is and links to the
+page.
+
 ## Not yet verified
 
 - **Sign-in by email.** Production sign-in was done with a minted link

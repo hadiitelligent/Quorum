@@ -169,6 +169,17 @@ select t.check_denied(
 select t.become('00000000-0000-0000-0000-000000000001');
 select t.check_rowcount('select * from public.chat_messages', 0, 'an admin does not see other people''s chats');
 
+-- --- 2b. the standing brief is one person's ----------------------------------
+select t.become('00000000-0000-0000-0000-000000000002');
+insert into public.briefs (person_id, content) values ('00000000-0000-0000-0000-000000000002', 'Meridian: $4.2M ARR.');
+update public.briefs set content = 'Meridian: $4.3M ARR.' where person_id = '00000000-0000-0000-0000-000000000002';
+select t.check_eq((select content from public.briefs where person_id = '00000000-0000-0000-0000-000000000002'), 'Meridian: $4.3M ARR.', 'a person keeps their own standing brief');
+select t.check_denied(
+  $q$ insert into public.briefs (person_id, content) values ('00000000-0000-0000-0000-000000000003', 'as someone else') $q$,
+  'a person cannot write somebody else''s brief');
+select t.become('00000000-0000-0000-0000-000000000001');
+select t.check_rowcount('select * from public.briefs', 0, 'an admin does not see other people''s briefs');
+
 -- --- 3. sessions: the board's record ------------------------------------------
 select t.become('00000000-0000-0000-0000-000000000003');
 select t.check_rowcount('select * from public.sessions', 1, 'everyone on the roster sees the sessions');
@@ -263,6 +274,7 @@ select t.check_denied('select * from public.people',             'anon cannot re
 select t.check_denied('select * from public.advisors',           'anon cannot read advisors');
 select t.check_denied('select * from public.advisor_documents',  'anon cannot read documents');
 select t.check_denied('select * from public.chat_messages',      'anon cannot read chats');
+select t.check_denied('select * from public.briefs',             'anon cannot read briefs');
 select t.check_denied('select * from public.sessions',           'anon cannot read sessions');
 select t.check_denied('select * from public.session_views',      'anon cannot read views');
 select t.check_denied('select * from public.session_votes',      'anon cannot read votes');

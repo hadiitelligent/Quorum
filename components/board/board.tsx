@@ -3,31 +3,23 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { CaretDown, CaretUp, ChatCircle, Check, Copy, UsersThree, X } from '@phosphor-icons/react'
+import { ChatCircle, Check, UsersThree, X } from '@phosphor-icons/react'
 import type { Advisor } from '@/lib/quorum/types'
 import { countWord } from '@/lib/quorum/text'
-import { BRIEF_CHAR_CAP, DEFAULT_QUESTION, briefPrompt } from '@/lib/quorum/session'
+import { DEFAULT_QUESTION, briefAgeDays } from '@/lib/quorum/session'
 import { api } from '@/lib/client-api'
-import { useHref, useShell } from '@/components/shell/context'
-import { useStored, writeStored } from '@/components/shell/stored'
+import { useHref } from '@/components/shell/context'
 import { Avatar } from '@/components/ui/avatar'
 import { Meter } from '@/components/ui/meter'
-
-const BRIEF_KEY = 'quorum.brief'
 
 /** Screen 1 — the board: the convene panel (question + brief) and the advisor grid. */
 export function Board() {
   const router = useRouter()
   const href = useHref()
-  const { person } = useShell()
   const [roster, setRoster] = useState<Advisor[] | null>(null)
   const [question, setQuestion] = useState('')
-  // The brief is remembered per browser, so the next session starts from the
-  // last one and the client edits rather than rewrites.
-  const brief = useStored(BRIEF_KEY) ?? ''
-  const [briefOpenOverride, setBriefOpen] = useState<boolean | null>(null)
-  const briefOpen = briefOpenOverride ?? brief.trim().length > 0
-  const [copied, setCopied] = useState(false)
+  // The standing brief lives on the Business page; the board only says how fresh it is.
+  const [brief, setBrief] = useState<{ has: boolean; updatedAt: string | null } | null>(null)
   // Who is in the room: nobody until the client clicks advisors in, in the
   // order they were clicked. Clicking a card again, or its chip, takes them out.
   const [selected, setSelected] = useState<string[]>([])
@@ -38,26 +30,16 @@ export function Board() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function updateBrief(text: string) {
-    writeStored(BRIEF_KEY, text.trim() ? text : null)
-  }
-  async function copyPrompt() {
-    try {
-      await navigator.clipboard.writeText(briefPrompt(person.name))
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      setError('Could not reach the clipboard — select the prompt text below and copy it.')
-      setBriefOpen(true)
-    }
-  }
-
   useEffect(() => {
     let alive = true
     api.advisors.list().then((r) => {
       if (!alive) return
       if (r.ok) setRoster(r.data.advisors)
       else setError(r.message)
+    })
+    api.brief.get().then((r) => {
+      if (!alive) return
+      if (r.ok) setBrief({ has: r.data.brief.content.trim().length > 0, updatedAt: r.data.brief.updatedAt })
     })
     return () => {
       alive = false
@@ -66,13 +48,13 @@ export function Board() {
 
   async function convene() {
     if (busy) return
-    setBusy(true)
-    setError(null)
     if (invited.length === 0) {
       setError('Add at least one advisor to the room — click their card below.')
       return
     }
-    const r = await api.sessions.create(question.trim() || DEFAULT_QUESTION, brief.trim(), invited.map((a) => a.id))
+    setBusy(true)
+    setError(null)
+    const r = await api.sessions.create(question.trim() || DEFAULT_QUESTION, '', invited.map((a) => a.id))
     if (!r.ok) {
       setError(r.message)
       setBusy(false)
@@ -137,41 +119,30 @@ export function Board() {
           </div>
         )}
         <div className="brief">
-          <button type="button" className="brief-toggle" onClick={() => setBriefOpen(!briefOpen)} aria-expanded={briefOpen}>
-            {briefOpen ? <CaretUp size={13} /> : <CaretDown size={13} />}
-            <span className="kicker muted">Brief the board</span>
-            <span className="help">{brief.trim() ? `${brief.trim().length.toLocaleString()} characters attached` : 'Optional — but the board only knows what you tell it'}</span>
-          </button>
-          {briefOpen && (
-            <div className="brief-body">
-              <div className="help">
-                Before each session, ask Claude to summarize your business and where it stands right now, then paste the answer here. Every
-                advisor reads it at every stage, and it stays on the record with the session. The prompt below gets a brief a board can act on.
-              </div>
-              <div className="brief-actions">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={copyPrompt}>
-                  <Copy size={14} />
-                  {copied ? 'Copied' : 'Copy the prompt for Claude'}
-                </button>
-                <a className="btn btn-ghost btn-sm" href="https://claude.ai/new" target="_blank" rel="noreferrer">
-                  Open Claude
-                </a>
-              </div>
-              <details className="brief-prompt">
-                <summary className="help">See the prompt</summary>
-                <pre>{briefPrompt(person.name)}</pre>
-              </details>
-              <textarea
-                className="input"
-                rows={6}
-                value={brief}
-                onChange={(e) => updateBrief(e.target.value)}
-                maxLength={BRIEF_CHAR_CAP}
-                placeholder="Paste Claude's brief here — the business, where it stands, cash and runway, customers, team, roadmap, risks, constraints."
-                aria-label="The brief"
-              />
-            </div>
-          )}
+          <div className="brief-toggle" style={{ cursor: 'default' }}>
+            <span className="kicker muted">The brief</span>
+            <span className="help">
+              {brief === null
+                ? '…'
+                : brief.has
+                  ? (() => {
+                      const age = briefAgeDays(brief.updatedAt)
+                      const label = age === null ? 'your standing brief' : age === 0 ? 'updated today' : age === 1 ? 'updated yesterday' : `${age} days old`
+                      return (
+                        <>
+                          Your standing brief, {label}
+                          {age !== null && age >= 14 ? ' — get an update before convening' : ''} ·{' '}
+                          <Link href={href('/business')}>{age !== null && age >= 14 ? 'Update it' : 'Business'}</Link>
+                        </>
+                      )
+                    })()
+                  : (
+                      <>
+                        None yet — the board only knows what you tell it · <Link href={href('/business')}>Brief the board</Link>
+                      </>
+                    )}
+            </span>
+          </div>
         </div>
         <div className="convene-foot">
           <div className="help">Each advisor forms an independent view before seeing the others&rsquo; — then they challenge, then synthesize.</div>

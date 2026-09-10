@@ -109,10 +109,13 @@ test('briefPrompt asks for a structured, dated, honest brief', async () => {
   const { briefPrompt, BRIEF_CHAR_CAP } = await import('../../lib/quorum/session')
   const p = briefPrompt('Dana Reyes')
   assert.match(p, /Dana Reyes/)
-  assert.match(p, /Cash and runway/)
+  for (const section of ['The business', 'Where we stand today', 'Assets', 'Liabilities and obligations', 'Cash and runway', 'Goals and targets', 'Pipeline', 'Customers and market', 'Team', 'Product and roadmap', 'Risks and open questions', 'Constraints']) {
+    assert.match(p, new RegExp(section))
+  }
   assert.match(p, /mark estimates as estimates/)
+  assert.match(p, /counterparty, the value, the stage, the expected close date/)
   assert.doesNotMatch(briefPrompt(), /\(\)/)
-  assert.ok(BRIEF_CHAR_CAP >= 10_000)
+  assert.ok(BRIEF_CHAR_CAP >= 50_000)
 })
 
 test('rosterFor is the invited who are still active, or everyone when nobody was named', async () => {
@@ -120,4 +123,16 @@ test('rosterFor is the invited who are still active, or everyone when nobody was
   assert.deepEqual(rosterFor({ advisorIds: [] }, roster), roster)
   assert.deepEqual(rosterFor({ advisorIds: ['c', 'a', 'gone'] }, roster), [A, C])
   assert.deepEqual(rosterFor({ advisorIds: ['gone'] }, roster), [])
+})
+
+test('updatePrompt carries the current brief and asks for a what-changed section', async () => {
+  const { updatePrompt, briefAgeDays } = await import('../../lib/quorum/session')
+  const p = updatePrompt('Meridian: $4.2M ARR.', '2026-09-01T10:00:00Z', 'Dana')
+  assert.match(p, /last updated September 1, 2026/)
+  assert.match(p, /What changed since the last brief/)
+  assert.match(p, /--- CURRENT BRIEF ---\nMeridian: \$4\.2M ARR\.\n--- END ---/)
+  assert.match(updatePrompt('x', null), /last updated the last time/)
+  assert.equal(briefAgeDays(null), null)
+  assert.equal(briefAgeDays('2026-09-01T10:00:00Z', new Date('2026-09-10T09:00:00Z')), 8)
+  assert.equal(briefAgeDays('nonsense'), null)
 })

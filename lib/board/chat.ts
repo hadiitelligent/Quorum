@@ -5,8 +5,9 @@ import type { PersonRow } from '@/lib/database.types'
 import type { Advisor } from '@/lib/quorum/types'
 import { advisorModel } from '@/lib/env'
 import { listMessages } from '@/lib/chats'
+import { briefText } from '@/lib/briefs'
 import { activeRoster, boardContext, personaSystem } from './context'
-import { chatSystemAddendum } from './prompts'
+import { briefBlock, chatSystemAddendum } from './prompts'
 import { callText, type ModelText } from './model'
 
 /** The model sees the last this-many messages of the private conversation. */
@@ -20,9 +21,12 @@ export async function chatTurn(db: Db, person: PersonRow, advisor: Advisor, ques
   const roster = await activeRoster(db)
   const system = await personaSystem(db, advisor, boardContext(person, roster))
   const history = (await listMessages(db, person.id, advisor.id)).slice(-HISTORY)
+  const brief = await briefText(db, person.id)
   return callText({
     model: advisorModel(),
-    system: [...system, { text: chatSystemAddendum(), cache: false }],
+    // The standing brief sits after the persona blocks: cached on its own, so
+    // an updated brief invalidates only itself.
+    system: [...system, { text: briefBlock(brief), cache: true }, { text: chatSystemAddendum(), cache: false }],
     messages: [...history.map((m) => ({ role: m.role === 'user' ? ('user' as const) : ('assistant' as const), content: m.content })), { role: 'user', content: question }],
     effort: 'medium',
   })

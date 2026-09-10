@@ -3,6 +3,7 @@ import { ApiError, apiContext, json, parseBody, toErrorResponse } from '@/lib/ap
 import { anthropicKey } from '@/lib/env'
 import { listAdvisors } from '@/lib/advisors'
 import { createSession, listSessions, loadSession } from '@/lib/sessions'
+import { briefText } from '@/lib/briefs'
 import { BRIEF_CHAR_CAP, DEFAULT_QUESTION } from '@/lib/quorum/session'
 
 /**
@@ -39,7 +40,9 @@ export async function POST(request: Request) {
     const active = new Set(roster.map((a) => a.id))
     const invited = [...new Set(body.advisorIds ?? [])].filter((id) => active.has(id))
     if (body.advisorIds && invited.length === 0) throw new ApiError('Pick at least one advisor for the session.', 422)
-    const row = await createSession(supabase, person.id, body.question || DEFAULT_QUESTION, body.brief, invited.length === roster.length ? roster.map((a) => a.id) : invited)
+    // The brief on the session is the person's standing brief unless one was sent.
+    const brief = body.brief || (await briefText(supabase, person.id))
+    const row = await createSession(supabase, person.id, body.question || DEFAULT_QUESTION, brief, invited.length === roster.length ? roster.map((a) => a.id) : invited)
     return json({ session: await loadSession(supabase, row.id) }, 201)
   } catch (error) {
     return toErrorResponse(error)

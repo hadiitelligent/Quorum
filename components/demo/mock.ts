@@ -1,4 +1,4 @@
-import { DemoStore } from './script'
+import { DEMO_INSIGHT, DemoStore } from './script'
 import type { NextStep } from '@/lib/quorum/session'
 
 /**
@@ -66,6 +66,13 @@ export function installDemo(): DemoStore {
       if (!a) return json({ message: 'That advisor is not on the board.' }, 404)
       if (method === 'GET') return json({ advisor: a, messages: store.chats[id] ?? [] })
       if (method === 'POST') return json({ messages: await store.reply(id, String(body.message ?? '')), model: 'scripted' })
+    }
+    if (path === '/api/brief' && method === 'GET') return json({ brief: { content: store.brief, updatedAt: store.briefUpdatedAt, insight: store.brief ? DEMO_INSIGHT : null, insightError: '' } })
+    if (path === '/api/brief' && method === 'PUT') {
+      store.brief = String(body.content ?? '').trim()
+      store.briefUpdatedAt = store.brief ? new Date().toISOString() : null
+      await store.delay(1200)
+      return json({ brief: { content: store.brief, updatedAt: store.briefUpdatedAt, insight: store.brief ? DEMO_INSIGHT : null, insightError: '' } })
     }
     if (path === '/api/sessions' && method === 'GET') return json({ sessions: store.summaries() })
     if (path === '/api/sessions' && method === 'POST') return json({ session: store.createSession(String(body.question ?? ''), String(body.brief ?? ''), Array.isArray(body.advisorIds) ? (body.advisorIds as string[]) : []) }, 201)

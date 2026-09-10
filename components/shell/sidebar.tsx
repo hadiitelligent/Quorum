@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChatsCircle, Stack, UsersThree } from '@phosphor-icons/react'
+import { Buildings, ChatsCircle, Stack, UsersThree } from '@phosphor-icons/react'
 import { useHref, useShell } from './context'
 import { Brand } from './brand'
 import { Avatar } from '@/components/ui/avatar'
@@ -19,6 +19,7 @@ export function Sidebar() {
 
   const boardActive = path === '/' || path.startsWith('/chat/') || /^\/sessions\/[^/]+/.test(path)
   const sessionsActive = path === '/sessions'
+  const businessActive = path === '/business'
   const libraryActive = path === '/library'
 
   return (
@@ -30,6 +31,10 @@ export function Sidebar() {
         <Link href={href('/')} className="navbtn" aria-current={boardActive ? 'page' : undefined}>
           <UsersThree size={17} />
           <span>Board</span>
+        </Link>
+        <Link href={href('/business')} className="navbtn" aria-current={businessActive ? 'page' : undefined}>
+          <Buildings size={17} />
+          <span>Business</span>
         </Link>
         <Link href={href('/sessions')} className="navbtn" aria-current={sessionsActive ? 'page' : undefined}>
           <ChatsCircle size={17} />

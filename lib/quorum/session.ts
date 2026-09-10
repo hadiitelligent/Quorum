@@ -123,30 +123,63 @@ export function mergeSession(a: Session, b: Session): Session {
   return merged
 }
 
-/** The brief: what the client pastes so the board knows the business. Fits the model's context many times over; the cap keeps the record readable. */
-export const BRIEF_CHAR_CAP = 24_000
+/** The standing brief: the client's comprehensive summary of the business. Long enough for a real one; the cap keeps the record readable. */
+export const BRIEF_CHAR_CAP = 60_000
 
 /**
- * The prompt a client copies into Claude (claude.ai or the app) to produce
- * the brief. Written so the answer is structured, dated and honest about
- * unknowns — what a board needs, not a pitch.
+ * The prompt a client copies into their own Claude (claude.ai, the app, or
+ * Claude Code with their files) to produce the standing brief. Their Claude
+ * already knows their business; the board does not. Written so the answer is
+ * comprehensive, structured, dated and honest about unknowns — what a board
+ * needs to decide, not a pitch.
  */
 export function briefPrompt(clientName?: string): string {
   return [
-    `I am about to put a decision to my board of advisors. Write a brief on my business and its current situation that a board member who has never met me could act on. Use everything you know about me${clientName ? ` (${clientName})` : ''} from our conversations and any files or projects you have; ask me for anything material you do not have, then write the brief.`,
+    `I keep an AI board of advisors that decides on questions I put to it. It knows nothing about my business except what I give it. Write the comprehensive brief it needs: my business, where it stands today, what we own and owe, our goals and targets, and every deal in the pipeline. Use everything you know about me${clientName ? ` (${clientName})` : ''} from our conversations, projects and files. Before you write, ask me for anything material you do not have — numbers especially — then write the brief in full.`,
     '',
-    'Structure it as short sections with plain headings:',
-    '1. The business — what we sell, to whom, how we make money, how big we are (revenue, growth, margin, headcount), stage and funding.',
-    '2. Where we are right now — the last quarter in numbers and events; what is working; what is not.',
-    '3. Cash and runway — cash, burn, months of runway, debt, any capital in motion.',
-    '4. Customers and pipeline — concentration, retention, the deals that matter and their status.',
-    '5. Team — who leads what, gaps, anyone at risk.',
-    '6. Product and roadmap — what ships when, and what it changes.',
-    '7. Risks and open questions — legal, regulatory, competitive, technical; what I am worried about.',
-    '8. Constraints — what is fixed (deadlines, commitments, non-negotiables).',
+    'Structure it as these sections, with plain headings, facts first:',
     '',
-    'Rules: facts and figures with dates; mark estimates as estimates and unknowns as unknown; no marketing language; under 1,200 words.',
+    '1. The business — what we sell, to whom, how we make money, the model and pricing, how big we are (revenue or ARR, growth rate, gross margin, headcount), stage, funding history, ownership.',
+    '2. Where we stand today — the last quarter in numbers and events; what is working; what is not; what changed since the last brief.',
+    '3. Assets — what we own and what it is worth: cash and equivalents, property and equipment, inventory, intellectual property, investments, key contracts and licences, the brand and audience. Dated valuations, with the basis.',
+    '4. Liabilities and obligations — debt and its terms, leases, guarantees, deferred revenue, legal exposure, covenants and the headroom on them.',
+    '5. Cash and runway — cash, burn or free cash flow, months of runway, capital in motion.',
+    '6. Goals and targets — the numbers we are aiming at for the next 12 months and the next 3 years, what management calls the plan, and how we are tracking against it.',
+    '7. Pipeline — every deal that matters (sales, partnerships, financing, acquisitions, hires): the counterparty, the value, the stage, the expected close date, the probability, the blocker, who owns it.',
+    '8. Customers and market — concentration, retention and churn, the accounts that matter, the competitors and what they did lately.',
+    '9. Team — who leads what, gaps, anyone at risk, hiring in progress.',
+    '10. Product and roadmap — what ships when, and what it changes for the business.',
+    '11. Risks and open questions — legal, regulatory, competitive, technical, key-person; what I am worried about.',
+    '12. Constraints — what is fixed: deadlines, commitments, non-negotiables, what I will not do.',
+    '',
+    'Rules: every figure with a date and a basis; mark estimates as estimates and unknowns as unknown rather than filling gaps; no marketing language; write for a director who has never met me; under 3,000 words. When you are done, ask me whether anything is wrong, and correct it.',
   ].join('\n')
+}
+
+/**
+ * The prompt for every later session: their Claude gets the current brief
+ * back and revises it, so the board always reads one whole, current document
+ * rather than a stack of updates.
+ */
+export function updatePrompt(currentBrief: string, updatedAt: string | null, clientName?: string): string {
+  const when = updatedAt ? new Date(updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'the last time'
+  return [
+    `I am about to convene my AI board of advisors. Below is the standing brief on my business that you wrote for it, last updated ${when}. Bring it up to date. Use everything you know about me${clientName ? ` (${clientName})` : ''} from our conversations, projects and files since then; ask me for anything material you do not have — new numbers, deals that moved, anything that changed — then rewrite the brief in full.`,
+    '',
+    'Keep the same twelve sections and the same rules (every figure dated with its basis; estimates marked; unknowns left unknown; no marketing language; under 3,000 words). Add one section at the top, "What changed since the last brief", listing the material changes in a few lines each: numbers that moved, deals that advanced, closed or died, new risks, decisions taken. Then ask me whether anything is wrong, and correct it.',
+    '',
+    '--- CURRENT BRIEF ---',
+    currentBrief.trim(),
+    '--- END ---',
+  ].join('\n')
+}
+
+/** Days since the brief was last saved; null when there is none. */
+export function briefAgeDays(updatedAt: string | null, now: Date = new Date()): number | null {
+  if (!updatedAt) return null
+  const at = new Date(updatedAt).getTime()
+  if (Number.isNaN(at)) return null
+  return Math.max(0, Math.floor((now.getTime() - at) / 86_400_000))
 }
 
 /** The advisors in the room: the invited ones still on the board, or everyone active when nobody was named. */

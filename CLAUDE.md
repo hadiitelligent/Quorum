@@ -102,6 +102,20 @@ unprivileged role (`supabase/tests/permissions.test.sql`).
 7. **Strengths are `{ s, lv 1–5 }`, at most three** (`advisors_check_strengths`).
 8. `updated_at` is the database's clock.
 
+## The brief and the insight
+
+Each person keeps ONE standing brief (`briefs`, RLS by person): the
+comprehensive summary of their business that their own Claude writes from
+`briefPrompt` (first time) or `updatePrompt` (later; carries the current
+brief, asks for a "what changed" section). Saving it runs `extractInsight`
+(`lib/board/insight.ts`, structured output against `InsightSchema` in
+`lib/quorum/insight.ts`; everything the brief does not say is null and
+listed under `unknowns` — the extraction never invents a figure). The
+Business page (`components/business/`) renders the insight. Convening
+copies the brief onto the session; `lib/board/chat.ts` puts it in the
+private chats as its own cache-marked block. The board redirects to
+`/business` until a brief exists.
+
 ## The convene orchestration
 
 The browser drives it (`components/session/session.tsx`): read the record,

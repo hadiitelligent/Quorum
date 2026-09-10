@@ -1,5 +1,6 @@
 import type { Advisor, AdvisorDocument, ChatMessage, Session, SessionSummary } from '@/lib/quorum/types'
 import type { NextStep } from '@/lib/quorum/session'
+import type { Insight } from '@/lib/quorum/insight'
 
 /**
  * The browser's side of the API. Every call returns `{ ok, message }` so the
@@ -23,6 +24,8 @@ async function call<T>(url: string, method: string, body?: unknown): Promise<Res
   }
 }
 
+export type StandingBrief = { content: string; updatedAt: string | null; insight: Insight | null; insightError: string }
+
 export type AdvisorBody = {
   name: string
   role: string
@@ -44,6 +47,10 @@ export const api = {
     add: (advisorId: string, body: { title: string; category: string; content: string }) =>
       call<{ document: AdvisorDocument }>(`/api/advisors/${advisorId}/documents`, 'POST', body),
     remove: (advisorId: string, docId: string) => call<{ ok: true }>(`/api/advisors/${advisorId}/documents/${docId}`, 'DELETE'),
+  },
+  brief: {
+    get: () => call<{ brief: StandingBrief }>('/api/brief', 'GET'),
+    save: (content: string) => call<{ brief: StandingBrief }>('/api/brief', 'PUT', { content }),
   },
   chat: {
     get: (advisorId: string) => call<{ advisor: Advisor; messages: ChatMessage[] }>(`/api/advisors/${advisorId}/chat`, 'GET'),

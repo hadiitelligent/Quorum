@@ -35,6 +35,16 @@ can hold all of them: **Next.js 16** (App Router, TypeScript) deployed on
 Postgres and magic-link sign-in; the **Anthropic API** (Claude Opus 5 by
 default) for every advisor.
 
+## The brief
+
+The board knows nothing about the client's business except what it is told.
+The Business page gives the client a prompt to run in their own Claude —
+the business, where it stands, assets and liabilities, cash flow, goals and
+targets, the pipeline — and turns the pasted brief into a dashboard. Before
+each session an update prompt carries the current brief back to their
+Claude for a "what changed" rewrite. Every advisor reads the brief at every
+stage, and the copy the board saw stays on the session's record.
+
 ## How a session runs
 
 ```

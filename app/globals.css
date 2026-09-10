@@ -373,6 +373,28 @@ textarea.input { min-height: 0; resize: vertical; line-height: 1.5; }
 .dissent p:last-child { margin-bottom: 0; }
 .synth-actions { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
 
+/* — the business page — */
+.business { max-width: 960px; gap: var(--space-6); }
+.setup { gap: var(--space-4); padding: var(--space-6); }
+.setup-steps { display: flex; flex-direction: column; gap: var(--space-6); }
+.setup-step { display: flex; gap: var(--space-4); align-items: flex-start; }
+.setup-step > i { width: 22px; height: 22px; flex: none; border-radius: 50%; border: 1px solid var(--color-accent); color: var(--color-accent); display: grid; place-items: center; font-size: 10px; font-style: normal; margin-top: 2px; }
+.setup-step > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.setup-title { font-family: var(--font-heading); font-weight: 500; font-size: 15px; }
+.overview { display: flex; flex-direction: column; gap: 4px; }
+.overview-text { margin: 0; font-size: 15px; line-height: 1.6; max-width: 76ch; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-4); }
+.tile { gap: 2px; padding: var(--space-4); }
+.tile-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-500); }
+.tile-value { font-family: var(--font-heading); font-weight: 500; font-size: 24px; line-height: 1.1; letter-spacing: -0.015em; }
+.tile-sub { font-size: 11px; color: var(--color-neutral-400); }
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start; }
+.two-col section { gap: var(--space-3); padding: var(--space-4); }
+.rows { display: flex; flex-direction: column; }
+.rows .row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 5px 0; font-size: 13px; background: linear-gradient(to right, transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 24px, color-mix(in srgb, var(--color-text) 8%, transparent) calc(100% - 24px), transparent) no-repeat bottom / 100% 1px; }
+.rows .row:last-child { background: none; }
+.rows .row b { font-weight: 500; white-space: nowrap; }
+
 /* — 4. sessions — */
 .sessions { max-width: 900px; gap: var(--space-6); }
 

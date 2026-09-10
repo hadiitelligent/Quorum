@@ -1,4 +1,5 @@
 import type { Advisor, AdvisorDocument, ChatMessage, Session, SessionSummary } from '@/lib/quorum/types'
+import type { Insight } from '@/lib/quorum/insight'
 import { editedLabel, firstName, initials, primarySegment, sourcesLine } from '@/lib/quorum/text'
 import { mergeSession, rosterFor, statusFor } from '@/lib/quorum/session'
 import type { NextStep } from '@/lib/quorum/session'
@@ -113,6 +114,8 @@ export class DemoStore {
   documents: Record<string, AdvisorDocument[]> = {}
   chats: Record<string, ChatMessage[]> = {}
   sessions: Session[] = []
+  brief = ''
+  briefUpdatedAt: string | null = null
 
   constructor(speed = 1) {
     this.speed = speed
@@ -264,3 +267,17 @@ const SAMPLE_SESSIONS: Session[] = [
   { id: 'sample-2', question: 'VP Engineering — final two candidates', brief: '', advisorIds: [], status: 'done', stage: 3, recommendation: 'Hire the platform candidate.', error: '', convenedBy: DEMO_PERSON.name, personId: DEMO_PERSON.id, createdAt: '2026-08-14T15:00:00Z', completedAt: '2026-08-14T15:05:00Z', views: [], challenges: [], votes: [{ advisorId: 'adv-2', name: 'Dr. Amara Osei', initials: 'AO', vote: 'agree', statement: 'Yes.' }] },
   { id: 'sample-3', question: 'EU expansion go/no-go', brief: '', advisorIds: [], status: 'done', stage: 3, recommendation: 'Defer; revisit Q4.', error: '', convenedBy: DEMO_PERSON.name, personId: DEMO_PERSON.id, createdAt: '2026-07-30T15:00:00Z', completedAt: '2026-07-30T15:05:00Z', views: [], challenges: [], votes: [{ advisorId: 'adv-5', name: 'James Whitfield', initials: 'JW', vote: 'agree', statement: 'Yes.' }] },
 ]
+
+/** What the extraction returns for the demo, whatever is pasted. */
+export const DEMO_INSIGHT: Insight = {
+  company: { name: 'Meridian', oneLiner: 'B2B revenue analytics for mid-market manufacturers', overview: 'Meridian sells revenue-analytics software to mid-market manufacturers on annual subscriptions. It reached $4.2M ARR in Q3 2026, growing about 8% a month with 74% gross margins and 31 people. Fourteen months of runway remain; a platform launch in March 2027 is meant to move it from a reporting tool to a system of record.', stage: 'Seed, raising Series B', currency: 'USD', asOf: '2026-09-10' },
+  revenue: { arr: 4_200_000, annualRevenue: null, growthMonthlyPct: 8, grossMarginPct: 74, headcount: 31 },
+  assets: { total: null, items: [{ name: 'Cash and equivalents', value: 5_100_000, basis: 'bank, Sep 2026' }, { name: 'Contracted ARR', value: 4_200_000, basis: 'signed subscriptions' }, { name: 'Platform IP', value: null, basis: 'not valued' }] },
+  liabilities: { total: null, items: [{ name: 'Deferred revenue', value: 1_400_000, terms: 'annual prepayments' }, { name: 'Office lease', value: 420_000, terms: '2 years remaining' }] },
+  cash: { cash: 5_100_000, monthlyNet: -360_000, runwayMonths: 14 },
+  overheads: { monthlyTotal: 520_000, items: [{ name: 'Payroll', monthly: 410_000 }, { name: 'Cloud and tooling', monthly: 48_000 }, { name: 'Office', monthly: 17_500 }, { name: 'Sales and marketing programs', monthly: 44_500 }] },
+  targets: [{ metric: 'ARR', target: '$6.5M', current: '$4.2M', by: 'Dec 2026', progressPct: 65 }, { metric: 'Enterprise logos', target: '6', current: '2', by: 'Jun 2027', progressPct: 33 }, { metric: 'Series B', target: '$40M pre-money', current: null, by: 'Q1 2027', progressPct: null }],
+  pipeline: [{ name: 'Northwind Steel', kind: 'sale', value: 480_000, stage: 'Legal', expectedClose: 'Q2 2027', probabilityPct: 60, blocker: 'Indemnity clause', owner: 'VP Sales' }, { name: 'Kestrel Components', kind: 'sale', value: 310_000, stage: 'Legal', expectedClose: 'Q2 2027', probabilityPct: 55, blocker: 'Indemnity clause', owner: 'VP Sales' }, { name: 'Series B', kind: 'financing', value: 40_000_000, stage: 'Pre-wiring', expectedClose: 'Q1 2027', probabilityPct: null, blocker: null, owner: 'CEO' }],
+  valuation: { estimate: 32_000_000, low: null, high: null, basis: 'seed round post-money, Jan 2025' },
+  unknowns: ['CAC payback', 'net revenue retention by cohort', 'debt terms'],
+}
