@@ -177,7 +177,9 @@ export function Business() {
 
       {error && <div className="msg warn">{error}</div>}
 
-      {hasBrief && !editing && (brief.insight ? <InsightView insight={brief.insight} ageLabel={ageLabel} /> : <div className="empty">The brief is saved ({ageLabel}), but no insight could be read from it yet. Update the brief to try again.</div>)}
+      {hasBrief && !editing && (brief.insight ? <InsightView insight={brief.insight} ageLabel={ageLabel} /> : <div className="empty">
+          The brief is saved ({ageLabel}), but no insight could be read from it yet.{brief.insightError ? ` ${brief.insightError}` : ''} Open &ldquo;Update the brief&rdquo; and save it again to retry.
+        </div>)}
     </div>
   )
 }

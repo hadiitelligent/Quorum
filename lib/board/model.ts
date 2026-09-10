@@ -102,3 +102,27 @@ export async function callJson<T extends z.ZodType>(call: ModelCall, schema: T):
   if (!parsed.success) throw new ApiError('The advisor answered in a shape the board could not read. Try again.', 502)
   return { data: parsed.data, model: response.model }
 }
+
+/**
+ * A structured answer WITHOUT the API's output grammar — for schemas too
+ * large for it ("The compiled grammar is too large"): the model is asked for
+ * JSON only, fences are stripped, and the zod schema validates the result.
+ */
+export async function callJsonLoose<T extends z.ZodType>(call: ModelCall, schema: T): Promise<{ data: z.infer<T>; model: string }> {
+  const response = await create(call)
+  if (response.stop_reason === 'refusal') throw new ApiError('The advisor declined to answer that.', 422)
+  const text = textOf(response)
+  const body = text.replace(/^[\s\S]*?(\{[\s\S]*\})[\s\S]*$/, '$1')
+  let raw: unknown
+  try {
+    raw = JSON.parse(body)
+  } catch {
+    throw new ApiError('The answer was not valid JSON. Try again.', 502)
+  }
+  const parsed = schema.safeParse(raw)
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    throw new ApiError(`The answer did not fit the schema (${issue.path.join('.')}: ${issue.message}). Try again.`, 502)
+  }
+  return { data: parsed.data, model: response.model }
+}
