@@ -68,7 +68,7 @@ export function installDemo(): DemoStore {
       if (method === 'POST') return json({ messages: await store.reply(id, String(body.message ?? '')), model: 'scripted' })
     }
     if (path === '/api/sessions' && method === 'GET') return json({ sessions: store.summaries() })
-    if (path === '/api/sessions' && method === 'POST') return json({ session: store.createSession(String(body.question ?? '')) }, 201)
+    if (path === '/api/sessions' && method === 'POST') return json({ session: store.createSession(String(body.question ?? ''), String(body.brief ?? ''), Array.isArray(body.advisorIds) ? (body.advisorIds as string[]) : []) }, 201)
     if ((m = path.match(/^\/api\/sessions\/([^/]+)$/)) && method === 'GET') {
       const s = store.sessions.find((x) => x.id === m![1])
       return s ? json({ session: s }) : json({ message: 'That session is not on the record.' }, 404)

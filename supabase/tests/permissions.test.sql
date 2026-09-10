@@ -95,7 +95,8 @@ update public.people set active = false where email = 'gone@example.com';
 
 insert into public.advisors (id, name, role, bio, strengths) values
   ('a0000000-0000-0000-0000-000000000001', 'Marcus Chen',  'Finance & Capital', 'Ex-CFO.', '[{"s":"Fundraising","lv":5}]'),
-  ('a0000000-0000-0000-0000-000000000002', 'Elena Vasquez','Go-to-Market',      'Former CRO.', '[{"s":"Enterprise sales","lv":5}]');
+  ('a0000000-0000-0000-0000-000000000002', 'Elena Vasquez','Go-to-Market',      'Former CRO.', '[{"s":"Enterprise sales","lv":5}]'),
+  ('a0000000-0000-0000-0000-000000000003', 'Not Invited',  'Nobody asked',      '', '[]');
 
 insert into public.advisor_documents (advisor_id, title, category, content, uploaded_by) values
   ('a0000000-0000-0000-0000-000000000001', 'Board memo Q2', 'board memo', 'Runway is 14 months.', 'seed');
@@ -104,8 +105,9 @@ insert into public.chat_messages (person_id, advisor_id, role, content) values
   ('00000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'user', 'Should we raise?'),
   ('00000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', 'user', 'Private question.');
 
-insert into public.sessions (id, person_id, question) values
-  ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'Series B now or in 12 months?');
+insert into public.sessions (id, person_id, question, brief, advisor_ids) values
+  ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'Series B now or in 12 months?', 'Runway 14 months, 2.1x NRR.',
+   '{a0000000-0000-0000-0000-000000000001,a0000000-0000-0000-0000-000000000002}');
 
 -- =============================================================================
 -- As `authenticated`
@@ -114,7 +116,7 @@ set role authenticated;
 
 -- --- 1. personas: everyone reads, admins write, nobody deletes ---------------
 select t.become('00000000-0000-0000-0000-000000000002');
-select t.check_rowcount('select * from public.advisors', 2, 'a founder sees every advisor');
+select t.check_rowcount('select * from public.advisors', 3, 'a founder sees every advisor');
 select t.check_rowcount('select * from public.advisor_documents', 1, 'a founder sees the grounding documents');
 select t.check_affected(
   $q$ update public.advisors set bio = 'changed' where id = 'a0000000-0000-0000-0000-000000000001' $q$,
@@ -130,7 +132,7 @@ select t.become('00000000-0000-0000-0000-000000000001');
 update public.advisors set bio = 'Ex-CFO through two IPOs.', updated_by = 'admin' where id = 'a0000000-0000-0000-0000-000000000001';
 select t.check_eq((select bio from public.advisors where id = 'a0000000-0000-0000-0000-000000000001'), 'Ex-CFO through two IPOs.', 'an admin can edit a persona');
 insert into public.advisors (name, role, bio, strengths, created_by, updated_by) values ('Priya Nair', 'Security & Infrastructure', '', '[{"s":"Security","lv":3}]', 'admin', 'admin');
-select t.check_rowcount('select * from public.advisors', 3, 'an admin can add a persona');
+select t.check_rowcount('select * from public.advisors', 4, 'an admin can add a persona');
 select t.check_denied(
   $q$ delete from public.advisors where id = 'a0000000-0000-0000-0000-000000000002' $q$,
   'an admin cannot delete a persona');
@@ -187,6 +189,16 @@ select t.become('00000000-0000-0000-0000-000000000002');
 select t.check_denied(
   $q$ update public.sessions set question = 'another question' where id = '50000000-0000-0000-0000-000000000001' $q$,
   'the question cannot be changed', 'question');
+select t.check_denied(
+  $q$ update public.sessions set brief = 'a different brief' where id = '50000000-0000-0000-0000-000000000001' $q$,
+  'the brief cannot be changed', 'brief');
+select t.check_denied(
+  $q$ update public.sessions set advisor_ids = '{a0000000-0000-0000-0000-000000000001}' where id = '50000000-0000-0000-0000-000000000001' $q$,
+  'the roster of a session cannot be changed', 'roster');
+select t.check_denied(
+  $q$ insert into public.session_views (session_id, advisor_id, advisor_name, advisor_role, view)
+      values ('50000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Not Invited', 'X', 'x') $q$,
+  'an advisor who was not invited cannot give a view', 'not in this session');
 select t.check_denied(
   $q$ insert into public.session_votes (session_id, advisor_id, advisor_name, vote, statement)
       values ('50000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Marcus Chen', 'agree', 'x') $q$,

@@ -11,7 +11,7 @@ import { ApiError } from '@/lib/errors'
 export function fromPostgrestError(error: { code?: string; message: string }): ApiError {
   switch (error.code) {
     case '42501':
-      return new ApiError(/record|forward|reopened|question/.test(error.message) ? error.message : 'Not allowed for you.', 403)
+      return new ApiError(/record|forward|reopened|question|brief|roster|in this session/.test(error.message) ? error.message : 'Not allowed for you.', 403)
     case '23503':
     case '23514':
       return new ApiError(error.message.replace(/^.*?:\s*/, ''), 422)

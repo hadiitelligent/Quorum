@@ -61,12 +61,21 @@ Deliberately the same as ITelliBuilder, EQFlow and the Maxest task board:
 
 `supabase/migrations/` is the source of truth; `lib/database.types.ts`
 mirrors it by hand. `people` (the sign-in roster; `is_admin` unlocks the
-library), `advisors` (soft-removed, never deleted), `advisor_documents` (text
+library), `advisors` (soft-removed, never deleted; seeded from
+`seed/advisors/*.json`, with grounding documents from
+`seed/documents/<same basename>/` and its `_documents.json` manifest), `advisor_documents` (text
 only; the whole knowledge base goes into the persona's cached system block,
 capped at `GROUNDING_CHAR_CAP`), `chat_messages` (one private conversation
 per person and advisor), `sessions` + `session_views` + `session_challenges`
 + `session_votes` (the record; every contribution snapshots the advisor's
-name and role so an edited or removed persona reads as it was).
+name and role so an edited or removed persona reads as it was). A session
+also carries the **brief** — the client's summary of the business, pasted
+at convene time (the convene panel offers the prompt to get it from Claude:
+`briefPrompt` in `lib/quorum/session.ts`) — fixed once convened and put
+before the question in every stage prompt (`briefBlock`). And **who is in
+the room**: `advisor_ids`, chosen on the convene panel, fixed once convened;
+`rosterFor` (pure) resolves it to the invited advisors still on the board,
+empty meaning everyone (sessions from before the picker).
 
 ## Rules that live in the database, not just the code
 
@@ -81,8 +90,9 @@ unprivileged role (`supabase/tests/permissions.test.sql`).
    `app.owns_session`).
 4. **Contributions are insert-only** — no update, no delete on views,
    challenges or votes. The vote's `statement` IS the recorded dissent.
-5. **`app.sessions_guard`**: the question never changes, the synthesis is
-   written once, the status only moves forward, done is final.
+5. **`app.sessions_guard`**: the question, the brief and the roster never
+   change, the synthesis is written once, the status only moves forward,
+   done is final. `session_views_check`: a view comes from an invited advisor.
 6. **A vote needs a view and a written synthesis first; a challenge is
    aimed at an advisor who gave a view** (`session_votes_check`,
    `session_challenges_check`).
@@ -116,6 +126,15 @@ output; all mutations through route handlers that re-check the caller
 the client reads on a screen comes from `docs/spec.md`'s copy.
 
 Route paths with brackets (`app/api/advisors/[id]`) must be quoted in zsh.
+
+## The 10X Strategic Director
+
+An unofficial, Grant Cardone-inspired persona. Its knowledge base is the
+"10X Strategic Director Decision Library" (172 principles with rule,
+operational interpretation, evidence level and counterweight), converted by
+`scripts/import-10x-library.ts` into one document per domain. The
+library's preface and the persona's instructions both say it is not Grant
+Cardone and does not speak for him; keep that in any edit.
 
 ## Deliberately left out
 

@@ -10,6 +10,8 @@ function session(over: Partial<Session> = {}): Session {
   return {
     id: 's1',
     question: 'Series B now?',
+    brief: '',
+    advisorIds: [],
     status: 'views',
     stage: 1,
     recommendation: '',
@@ -101,4 +103,21 @@ test('mergeSession unions the rows and keeps the furthest status', async () => {
   assert.equal(f.status, 'failed')
   assert.equal(f.recommendation, 'Do it.')
   assert.equal(f.error, 'Stopped at the vote: boom')
+})
+
+test('briefPrompt asks for a structured, dated, honest brief', async () => {
+  const { briefPrompt, BRIEF_CHAR_CAP } = await import('../../lib/quorum/session')
+  const p = briefPrompt('Dana Reyes')
+  assert.match(p, /Dana Reyes/)
+  assert.match(p, /Cash and runway/)
+  assert.match(p, /mark estimates as estimates/)
+  assert.doesNotMatch(briefPrompt(), /\(\)/)
+  assert.ok(BRIEF_CHAR_CAP >= 10_000)
+})
+
+test('rosterFor is the invited who are still active, or everyone when nobody was named', async () => {
+  const { rosterFor } = await import('../../lib/quorum/session')
+  assert.deepEqual(rosterFor({ advisorIds: [] }, roster), roster)
+  assert.deepEqual(rosterFor({ advisorIds: ['c', 'a', 'gone'] }, roster), [A, C])
+  assert.deepEqual(rosterFor({ advisorIds: ['gone'] }, roster), [])
 })

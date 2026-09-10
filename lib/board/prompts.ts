@@ -73,8 +73,17 @@ export function groundingBlock(docs: Grounding[], cap: number = GROUNDING_CHAR_C
 // The stages of a board session (spec §3)
 // ---------------------------------------------------------------------------
 
-export function viewPrompt(question: string): string {
+/** The client's brief, as every stage prompt carries it; empty when none was given. */
+export function briefBlock(brief: string): string {
+  const text = brief.trim()
+  if (!text) return 'The client gave the board no written brief for this session: advise from your own expertise and your knowledge base, and say what you would need to know.'
+  return `The client's brief on the business and its current situation, written for this session — treat it as fact unless it marks something as an estimate or unknown:\n\n${text}`
+}
+
+export function viewPrompt(question: string, brief = ''): string {
   return [
+    briefBlock(brief),
+    '',
     `The board has been convened. The question put to the board:`,
     '',
     `"${question}"`,
@@ -83,9 +92,11 @@ export function viewPrompt(question: string): string {
   ].join('\n')
 }
 
-export function challengePrompt(question: string, self: Pick<SessionView, 'advisorId' | 'name'>, views: SessionView[]): string {
+export function challengePrompt(question: string, self: Pick<SessionView, 'advisorId' | 'name'>, views: SessionView[], brief = ''): string {
   const others = views.filter((v) => v.advisorId !== self.advisorId)
   return [
+    briefBlock(brief),
+    '',
     `The question before the board: "${question}"`,
     '',
     'Every advisor has now given an independent view. Here they are, yours included:',
@@ -107,8 +118,10 @@ export const SYNTHESIS_SYSTEM = [
   '- Do not list the advisors or narrate the debate; the record already holds it. Write the decision.',
 ].join('\n')
 
-export function synthesisPrompt(question: string, views: SessionView[], challenges: SessionChallenge[]): string {
+export function synthesisPrompt(question: string, views: SessionView[], challenges: SessionChallenge[], brief = ''): string {
   return [
+    briefBlock(brief),
+    '',
     `The question put to the board: "${question}"`,
     '',
     'Independent views:',
@@ -122,9 +135,11 @@ export function synthesisPrompt(question: string, views: SessionView[], challeng
     .join('\n')
 }
 
-export function votePrompt(question: string, recommendation: string, challenges: SessionChallenge[], self: Pick<SessionView, 'name'>): string {
+export function votePrompt(question: string, recommendation: string, challenges: SessionChallenge[], self: Pick<SessionView, 'name'>, brief = ''): string {
   const aimedAtMe = challenges.filter((c) => c.to === self.name)
   return [
+    briefBlock(brief),
+    '',
     `The question put to the board: "${question}"`,
     '',
     'The board synthesis, as written by the secretary:',

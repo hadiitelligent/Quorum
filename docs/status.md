@@ -1,6 +1,6 @@
 # Status
 
-_2026-09-09 — built from the design handoff and deployed to production the same evening._
+_2026-09-09 — built from the design handoff and deployed to production the same evening. 2026-09-10 — the 10X Strategic Director persona and the brief._
 
 ## Live
 
@@ -41,7 +41,7 @@ adapted: `preflight` → `deploy` → `smoke-live`, `deploy:secrets`, `db:push`,
 Verified:
 
 - `npm run typecheck`, `npm run lint` — clean.
-- `npm run db:test` — every migration applied to a scratch cluster, the 45
+- `npm run db:test` — every migration applied to a scratch cluster, the 46
   permission assertions pass as the unprivileged role.
 - `npm run test:unit` — 22 tests (text helpers, session state machine,
   merge, memo, prompts) pass.
@@ -56,6 +56,26 @@ Verified:
   document added (the card's "Grounded in" line updated), Remove; a board of
   one skips the challenge round. No console errors.
 
+**2026-09-10.** Roster: Hossein (admin). **The 10X Strategic Director**:
+an unofficial Grant Cardone-inspired persona built from Hadi's "10X
+Strategic Director Decision Library v1" (172 principles, 16 domains, 30
+sources). `npm run import:10x -- <library.json>` turns the JSON into 18
+markdown documents under `seed/documents/06-10x-strategic-director/`; the
+seed now uploads a persona's documents from that folder (64k characters,
+under the 120k grounding cap). Its bio and instructions say plainly that it
+is not Grant Cardone and does not speak for him, as the library's own
+preface requires. **The brief** (Hadi's idea): the convene panel has a
+"Brief the board" section with a ready-made prompt to copy into Claude
+("summarize my business and where it stands"), a box to paste the answer,
+remembered per browser; the brief is a column on the session, fixed once
+convened (guard trigger, tested), carried at every stage in the prompts
+(tested), shown on the session page and in the memo. **Who is in the room** (Hadi's
+idea): the convene panel lists the personas as chips, all on by default;
+the chosen ids are stored on the session (`advisor_ids`, fixed once
+convened, a trigger refuses a view from anyone not invited), the stages run
+for exactly those advisors, and older sessions with an empty list mean
+"everyone who was active". The board of one skips the challenge round.
+
 ## Not yet verified
 
 - **Sign-in by email.** Production sign-in was done with a minted link
@@ -65,8 +85,7 @@ Verified:
 ## To redeploy (docs/deployment.md)
 
 `npm run deploy`. The database suite runs in preflight against a throwaway
-cluster from Postgres.app (`/Applications/Postgres.app`, Postgres 18) — 45
-assertions passed on 2026-09-09. `npm run deploy:secrets` again only when a
+cluster from Postgres.app (`/Applications/Postgres.app`, Postgres 18). `npm run deploy:secrets` again only when a
 value in `.env.local` changes.
 
 ## Decisions worth knowing

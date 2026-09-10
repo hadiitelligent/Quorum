@@ -122,3 +122,36 @@ export function mergeSession(a: Session, b: Session): Session {
   merged.stage = stageOf(merged.status, { views: merged.views.length, challenges: merged.challenges.length, recommendation: Boolean(merged.recommendation) })
   return merged
 }
+
+/** The brief: what the client pastes so the board knows the business. Fits the model's context many times over; the cap keeps the record readable. */
+export const BRIEF_CHAR_CAP = 24_000
+
+/**
+ * The prompt a client copies into Claude (claude.ai or the app) to produce
+ * the brief. Written so the answer is structured, dated and honest about
+ * unknowns — what a board needs, not a pitch.
+ */
+export function briefPrompt(clientName?: string): string {
+  return [
+    `I am about to put a decision to my board of advisors. Write a brief on my business and its current situation that a board member who has never met me could act on. Use everything you know about me${clientName ? ` (${clientName})` : ''} from our conversations and any files or projects you have; ask me for anything material you do not have, then write the brief.`,
+    '',
+    'Structure it as short sections with plain headings:',
+    '1. The business — what we sell, to whom, how we make money, how big we are (revenue, growth, margin, headcount), stage and funding.',
+    '2. Where we are right now — the last quarter in numbers and events; what is working; what is not.',
+    '3. Cash and runway — cash, burn, months of runway, debt, any capital in motion.',
+    '4. Customers and pipeline — concentration, retention, the deals that matter and their status.',
+    '5. Team — who leads what, gaps, anyone at risk.',
+    '6. Product and roadmap — what ships when, and what it changes.',
+    '7. Risks and open questions — legal, regulatory, competitive, technical; what I am worried about.',
+    '8. Constraints — what is fixed (deadlines, commitments, non-negotiables).',
+    '',
+    'Rules: facts and figures with dates; mark estimates as estimates and unknowns as unknown; no marketing language; under 1,200 words.',
+  ].join('\n')
+}
+
+/** The advisors in the room: the invited ones still on the board, or everyone active when nobody was named. */
+export function rosterFor<T extends { id: string }>(session: Pick<Session, 'advisorIds'>, active: T[]): T[] {
+  if (session.advisorIds.length === 0) return active
+  const invited = new Set(session.advisorIds)
+  return active.filter((a) => invited.has(a.id))
+}

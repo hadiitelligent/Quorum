@@ -13,6 +13,12 @@ export function sessionMemo(session: Session, opts: { boardName?: string; now?: 
   lines.push(`Convened by ${session.convenedBy} on ${new Date(session.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.`)
   lines.push(`Exported ${now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}${opts.boardName ? ` from ${opts.boardName}` : ''}.`)
   lines.push('')
+  if (session.brief) {
+    lines.push('## The brief')
+    lines.push('')
+    lines.push(session.brief)
+    lines.push('')
+  }
   if (session.recommendation) {
     lines.push('## Board synthesis')
     lines.push('')

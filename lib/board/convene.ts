@@ -5,7 +5,7 @@ import type { Db } from '@/lib/advisors'
 import { getAdvisor } from '@/lib/advisors'
 import type { PersonRow, SessionRow } from '@/lib/database.types'
 import type { Session } from '@/lib/quorum/types'
-import { statusFor } from '@/lib/quorum/session'
+import { rosterFor, statusFor } from '@/lib/quorum/session'
 import { advisorModel, synthesisModel } from '@/lib/env'
 import { loadSession, updateSessionRow } from '@/lib/sessions'
 import { fromPostgrestError } from '@/lib/api-errors'
@@ -48,6 +48,11 @@ function assertDriver(session: SessionRow | Session, person: PersonRow, row: Ses
   if (session.status === 'failed') throw new ApiError('That session stopped before synthesis. Convene again.', 409)
 }
 
+/** Who is in the room for this session. */
+async function sessionRoster(db: Db, session: Session) {
+  return rosterFor(session, await activeRoster(db))
+}
+
 async function rowOf(db: Db, id: string): Promise<SessionRow> {
   const { data, error } = await db.from('sessions').select('*').eq('id', id).maybeSingle()
   if (error) throw fromPostgrestError(error)
@@ -72,13 +77,14 @@ export async function runView({ db, person }: Ctx, sessionId: string, advisorId:
   const row = await rowOf(db, sessionId)
   let session = await loadSession(db, sessionId)
   assertDriver(session, person, row)
-  const roster = await activeRoster(db)
+  const roster = await sessionRoster(db, session)
+  if (!roster.some((a) => a.id === advisorId)) throw new ApiError('That advisor is not in this session.', 409)
   const existing = session.views.find((v) => v.advisorId === advisorId)
   if (!existing) {
     const advisor = await getAdvisor(db, advisorId)
     const system = await personaSystem(db, advisor, boardContext(person, roster))
     const out = await failing(db, sessionId, 'independent views', () =>
-      callText({ model: advisorModel(), system, messages: [{ role: 'user', content: viewPrompt(session.question) }], effort: 'medium' }),
+      callText({ model: advisorModel(), system, messages: [{ role: 'user', content: viewPrompt(session.question, session.brief) }], effort: 'medium' }),
     )
     const { error } = await db.from('session_views').insert({ session_id: sessionId, advisor_id: advisorId, advisor_name: advisor.name, advisor_role: advisor.role, view: out.text, model: out.model })
     if (error && error.code !== '23505') throw fromPostgrestError(error)
@@ -91,7 +97,7 @@ export async function runChallenge({ db, person }: Ctx, sessionId: string, advis
   const row = await rowOf(db, sessionId)
   let session = await loadSession(db, sessionId)
   assertDriver(session, person, row)
-  const roster = await activeRoster(db)
+  const roster = await sessionRoster(db, session)
   const self = session.views.find((v) => v.advisorId === advisorId)
   if (!self) throw new ApiError('That advisor has not given a view yet.', 409)
   const others = session.views.filter((v) => v.advisorId !== advisorId)
@@ -104,7 +110,7 @@ export async function runChallenge({ db, person }: Ctx, sessionId: string, advis
       challenge: z.string().min(1),
     })
     const out = await failing(db, sessionId, 'the challenge round', () =>
-      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: challengePrompt(session.question, self, session.views) }], effort: 'medium' }, schema),
+      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: challengePrompt(session.question, self, session.views, session.brief) }], effort: 'medium' }, schema),
     )
     const target = others.find((o) => o.advisorId === out.data.to)!
     const { error } = await db.from('session_challenges').insert({
@@ -126,7 +132,7 @@ export async function runSynthesis({ db, person }: Ctx, sessionId: string): Prom
   const row = await rowOf(db, sessionId)
   let session = await loadSession(db, sessionId)
   assertDriver(session, person, row)
-  const roster = await activeRoster(db)
+  const roster = await sessionRoster(db, session)
   if (session.views.length < roster.length) throw new ApiError('The board has not finished its independent views.', 409)
   if (!session.recommendation) {
     const schema = z.object({ recommendation: z.string().min(1) })
@@ -135,7 +141,7 @@ export async function runSynthesis({ db, person }: Ctx, sessionId: string): Prom
         {
           model: synthesisModel(),
           system: [{ text: SYNTHESIS_SYSTEM, cache: true }],
-          messages: [{ role: 'user', content: synthesisPrompt(session.question, session.views, session.challenges) }],
+          messages: [{ role: 'user', content: synthesisPrompt(session.question, session.views, session.challenges, session.brief) }],
           effort: 'high',
         },
         schema,
@@ -156,7 +162,7 @@ export async function runVote({ db, person }: Ctx, sessionId: string, advisorId:
   const row = await rowOf(db, sessionId)
   let session = await loadSession(db, sessionId)
   assertDriver(session, person, row)
-  const roster = await activeRoster(db)
+  const roster = await sessionRoster(db, session)
   if (!session.recommendation) throw new ApiError('The synthesis has not been written yet.', 409)
   const self = session.views.find((v) => v.advisorId === advisorId)
   if (!self) throw new ApiError('That advisor has not given a view yet.', 409)
@@ -164,7 +170,7 @@ export async function runVote({ db, person }: Ctx, sessionId: string, advisorId:
     const advisor = await getAdvisor(db, advisorId)
     const system = await personaSystem(db, advisor, boardContext(person, roster))
     const out = await failing(db, sessionId, 'the vote', () =>
-      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: votePrompt(session.question, session.recommendation, session.challenges, self) }], effort: 'medium' }, VOTE),
+      callJson({ model: advisorModel(), system, messages: [{ role: 'user', content: votePrompt(session.question, session.recommendation, session.challenges, self, session.brief) }], effort: 'medium' }, VOTE),
     )
     const { error } = await db.from('session_votes').insert({
       session_id: sessionId,
@@ -186,7 +192,7 @@ export async function complete({ db, person }: Ctx, sessionId: string): Promise<
   const session = await loadSession(db, sessionId)
   if (session.status === 'done') return session
   assertDriver(session, person, row)
-  const roster = await activeRoster(db)
+  const roster = await sessionRoster(db, session)
   const voted = new Set(session.votes.map((v) => v.advisorId))
   if (!roster.every((a) => voted.has(a.id))) throw new ApiError('Not every advisor has voted yet.', 409)
   return refreshStatus(db, session, roster.length)

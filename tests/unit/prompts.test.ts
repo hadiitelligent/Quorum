@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { GROUNDING_CHAR_CAP, challengePrompt, groundingBlock, personaPrompt, synthesisPrompt, viewPrompt, votePrompt } from '../../lib/board/prompts'
+import { GROUNDING_CHAR_CAP, briefBlock, challengePrompt, groundingBlock, personaPrompt, synthesisPrompt, viewPrompt, votePrompt } from '../../lib/board/prompts'
 import type { Advisor } from '../../lib/quorum/types'
 
 const marcus: Advisor = {
@@ -62,4 +62,20 @@ test('the stage prompts quote the question and address the right people', () => 
   assert.match(v, /preserved verbatim/)
   const v2 = votePrompt('Raise now?', 'Do it.', [], { name: 'Elena Vasquez' })
   assert.doesNotMatch(v2, /aimed at you/)
+})
+
+test('the brief travels with every stage, and its absence is said out loud', () => {
+  assert.match(briefBlock(''), /no written brief/)
+  assert.match(briefBlock('  Runway 14 months. '), /treat it as fact[\s\S]*Runway 14 months\./)
+  const views = [{ advisorId: 'a', name: 'Marcus Chen', initials: 'MC', role: 'F', view: 'Now.' }, { advisorId: 'b', name: 'Elena Vasquez', initials: 'EV', role: 'G', view: 'Wait.' }]
+  for (const p of [
+    viewPrompt('Q?', 'BRIEF-TEXT'),
+    challengePrompt('Q?', views[0], views, 'BRIEF-TEXT'),
+    synthesisPrompt('Q?', views, [], 'BRIEF-TEXT'),
+    votePrompt('Q?', 'Do it.', [], { name: 'Marcus Chen' }, 'BRIEF-TEXT'),
+  ]) {
+    assert.match(p, /BRIEF-TEXT/)
+    assert.ok(p.indexOf('BRIEF-TEXT') < p.indexOf('Q?'), 'the brief comes before the question')
+  }
+  assert.match(viewPrompt('Q?'), /no written brief/)
 })

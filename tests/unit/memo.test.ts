@@ -6,6 +6,8 @@ import type { Session } from '../../lib/quorum/types'
 const done: Session = {
   id: 's',
   question: 'Should we raise our Series B now?',
+  brief: '',
+  advisorIds: [],
   status: 'done',
   stage: 3,
   recommendation: 'Begin the raise in ~8 weeks.',
@@ -33,6 +35,11 @@ test('the memo carries the synthesis, the alignment and the dissent verbatim', (
   assert.match(memo, /### Marcus Chen — Finance & Capital\n\nRaise now\./)
   assert.match(memo, /\*\*Elena Vasquez → Marcus Chen:\*\* You are pricing fear\./)
   assert.ok(memo.endsWith('\n'))
+})
+
+test('the brief is on the memo when there was one', () => {
+  assert.match(sessionMemo({ ...done, brief: 'Runway 14 months.' }), /## The brief\n\nRunway 14 months\./)
+  assert.doesNotMatch(sessionMemo(done), /## The brief/)
 })
 
 test('a memo before synthesis says so', () => {

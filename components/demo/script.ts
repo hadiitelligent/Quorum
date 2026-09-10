@@ -1,6 +1,6 @@
 import type { Advisor, AdvisorDocument, ChatMessage, Session, SessionSummary } from '@/lib/quorum/types'
 import { editedLabel, firstName, initials, primarySegment, sourcesLine } from '@/lib/quorum/text'
-import { mergeSession, statusFor } from '@/lib/quorum/session'
+import { mergeSession, rosterFor, statusFor } from '@/lib/quorum/session'
 import type { NextStep } from '@/lib/quorum/session'
 import m1 from '@/seed/advisors/01-marcus-chen.json'
 import m2 from '@/seed/advisors/02-amara-osei.json'
@@ -175,10 +175,12 @@ export class DemoStore {
     return [asked, answered]
   }
 
-  createSession(question: string): Session {
+  createSession(question: string, brief = '', advisorIds: string[] = []): Session {
     const s: Session = {
       id: `s-${Date.now()}`,
       question,
+      brief,
+      advisorIds,
       status: 'views',
       stage: 1,
       recommendation: '',
@@ -196,7 +198,8 @@ export class DemoStore {
   }
 
   private touch(s: Session) {
-    s.status = s.status === 'failed' ? 'failed' : statusFor({ rosterSize: this.advisors.length, views: s.views.length, challenges: s.challenges.length, recommendation: Boolean(s.recommendation), votes: s.votes.length })
+    const room = rosterFor(s, this.advisors)
+    s.status = s.status === 'failed' ? 'failed' : statusFor({ rosterSize: room.length, views: s.views.length, challenges: s.challenges.length, recommendation: Boolean(s.recommendation), votes: s.votes.length })
     if (s.status === 'done' && !s.completedAt) s.completedAt = new Date().toISOString()
     const merged = mergeSession(s, s)
     Object.assign(s, merged)
@@ -205,15 +208,16 @@ export class DemoStore {
 
   async step(id: string, step: NextStep): Promise<Session> {
     const s = this.sessions.find((x) => x.id === id)!
-    const a = 'advisorId' in step ? this.advisors.find((x) => x.id === step.advisorId)! : null
-    const idx = a ? this.advisors.indexOf(a) : 0
+    const room = rosterFor(s, this.advisors)
+    const a = 'advisorId' in step ? room.find((x) => x.id === step.advisorId)! : null
+    const idx = a ? room.indexOf(a) : 0
     if (step.kind === 'view' && a && !s.views.some((v) => v.advisorId === a.id)) {
       await this.delay(800 + idx * 950)
       s.views.push({ advisorId: a.id, name: a.name, initials: a.initials, role: a.role, view: SCRIPT[a.name]?.view ?? 'I don’t have enough grounding on this company yet to take a firm position — flagging that so the synthesis weighs my view accordingly.' })
     } else if (step.kind === 'challenge' && a && !s.challenges.some((c) => c.fromId === a.id)) {
       await this.delay(800 + idx * 1400)
       const scripted = CHALLENGES.find((c) => c.from === a.name)
-      const target = this.advisors.find((x) => x.name === scripted?.to) ?? this.advisors.find((x) => x.id !== a.id)!
+      const target = room.find((x) => x.name === scripted?.to) ?? room.find((x) => x.id !== a.id)!
       s.challenges.push({ fromId: a.id, toId: target.id, from: a.name, fi: a.initials, to: target.name, text: scripted?.text ?? `${target.firstName}, what would change your mind, and by when?` })
     } else if (step.kind === 'synthesis' && !s.recommendation) {
       await this.delay(1500)
@@ -240,6 +244,8 @@ const SAMPLE_SESSIONS: Session[] = [
   {
     id: 'sample-1',
     question: 'Pricing model overhaul — seats to usage',
+    brief: '',
+    advisorIds: [],
     status: 'done',
     stage: 3,
     recommendation: 'Move to usage-based pricing for new logos from Q1 and grandfather seats for twelve months.',
@@ -255,6 +261,6 @@ const SAMPLE_SESSIONS: Session[] = [
       { advisorId: 'adv-3', name: 'Elena Vasquez', initials: 'EV', vote: 'disagree', statement: 'Usage pricing punishes the customers who love us most.' },
     ],
   },
-  { id: 'sample-2', question: 'VP Engineering — final two candidates', status: 'done', stage: 3, recommendation: 'Hire the platform candidate.', error: '', convenedBy: DEMO_PERSON.name, personId: DEMO_PERSON.id, createdAt: '2026-08-14T15:00:00Z', completedAt: '2026-08-14T15:05:00Z', views: [], challenges: [], votes: [{ advisorId: 'adv-2', name: 'Dr. Amara Osei', initials: 'AO', vote: 'agree', statement: 'Yes.' }] },
-  { id: 'sample-3', question: 'EU expansion go/no-go', status: 'done', stage: 3, recommendation: 'Defer; revisit Q4.', error: '', convenedBy: DEMO_PERSON.name, personId: DEMO_PERSON.id, createdAt: '2026-07-30T15:00:00Z', completedAt: '2026-07-30T15:05:00Z', views: [], challenges: [], votes: [{ advisorId: 'adv-5', name: 'James Whitfield', initials: 'JW', vote: 'agree', statement: 'Yes.' }] },
+  { id: 'sample-2', question: 'VP Engineering — final two candidates', brief: '', advisorIds: [], status: 'done', stage: 3, recommendation: 'Hire the platform candidate.', error: '', convenedBy: DEMO_PERSON.name, personId: DEMO_PERSON.id, createdAt: '2026-08-14T15:00:00Z', completedAt: '2026-08-14T15:05:00Z', views: [], challenges: [], votes: [{ advisorId: 'adv-2', name: 'Dr. Amara Osei', initials: 'AO', vote: 'agree', statement: 'Yes.' }] },
+  { id: 'sample-3', question: 'EU expansion go/no-go', brief: '', advisorIds: [], status: 'done', stage: 3, recommendation: 'Defer; revisit Q4.', error: '', convenedBy: DEMO_PERSON.name, personId: DEMO_PERSON.id, createdAt: '2026-07-30T15:00:00Z', completedAt: '2026-07-30T15:05:00Z', views: [], challenges: [], votes: [{ advisorId: 'adv-5', name: 'James Whitfield', initials: 'JW', vote: 'agree', statement: 'Yes.' }] },
 ]

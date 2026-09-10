@@ -274,6 +274,36 @@ textarea.input { min-height: 0; resize: vertical; line-height: 1.5; }
 .card-role { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-accent); }
 .empty { color: var(--color-neutral-500); font-size: 13px; padding: var(--space-6); text-align: center; }
 
+/* — who is in the room (board) — */
+.room { border-top: 1px solid var(--color-divider); padding-top: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); }
+.room-head { display: flex; align-items: center; gap: 8px; }
+.room-head .help { margin-left: auto; }
+.linkish { all: unset; cursor: pointer; color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.room-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.room-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 5px; border-radius: 99px;
+  border: 1px solid var(--color-divider); background: transparent; color: var(--color-neutral-500); font: inherit; font-size: 12px; cursor: pointer;
+}
+.room-chip:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
+.room-chip.on { border-color: var(--color-accent); color: var(--color-text); }
+.room-chip.on svg { color: var(--color-accent); }
+
+/* — the brief (board) and the brief on the record (session) — */
+.brief { border-top: 1px solid var(--color-divider); padding-top: var(--space-3); }
+.brief-toggle { all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; }
+.brief-toggle svg { color: var(--color-neutral-500); flex: none; }
+.brief-toggle .kicker { margin: 0; }
+.brief-toggle .help { margin-left: auto; text-align: right; }
+.brief-body { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
+.brief-actions { display: flex; gap: var(--space-2); align-items: center; }
+.brief-prompt summary { cursor: pointer; }
+.brief-prompt pre, .brief-record pre { white-space: pre-wrap; font: inherit; font-size: 13px; line-height: 1.55; margin: var(--space-2) 0 0; color: var(--color-neutral-300); }
+.brief-record { gap: 0; }
+.brief-record summary { cursor: pointer; display: flex; align-items: center; gap: 10px; list-style: none; }
+.brief-record summary::-webkit-details-marker { display: none; }
+.brief-record summary .kicker { margin: 0; }
+.brief-record pre { max-height: 40vh; overflow-y: auto; padding-top: var(--space-2); border-top: 1px solid var(--color-divider); margin-top: var(--space-2); }
+
 /* — 2. chat — */
 .chat { display: flex; flex-direction: column; height: 100vh; max-width: 820px; }
 .chat-head { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-8); border-bottom: 1px solid var(--color-divider); }

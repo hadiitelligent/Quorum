@@ -51,7 +51,7 @@ export const api = {
   },
   sessions: {
     list: () => call<{ sessions: SessionSummary[] }>('/api/sessions', 'GET'),
-    create: (question: string) => call<{ session: Session }>('/api/sessions', 'POST', { question }),
+    create: (question: string, brief = '', advisorIds?: string[]) => call<{ session: Session }>('/api/sessions', 'POST', { question, brief, advisorIds }),
     get: (id: string) => call<{ session: Session }>(`/api/sessions/${id}`, 'GET'),
     step: (id: string, step: NextStep) => {
       switch (step.kind) {

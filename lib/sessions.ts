@@ -11,8 +11,8 @@ import { ApiError } from '@/lib/errors'
  * lib/board/convene.ts; the state machine is lib/quorum/session.ts.
  */
 
-export async function createSession(db: Db, personId: string, question: string): Promise<SessionRow> {
-  const { data, error } = await db.from('sessions').insert({ person_id: personId, question: question.trim() }).select('*').maybeSingle()
+export async function createSession(db: Db, personId: string, question: string, brief = '', advisorIds: string[] = []): Promise<SessionRow> {
+  const { data, error } = await db.from('sessions').insert({ person_id: personId, question: question.trim(), brief: brief.trim(), advisor_ids: advisorIds }).select('*').maybeSingle()
   if (error) throw fromPostgrestError(error)
   if (!data) throw new ApiError('The session was not created.', 500)
   return data
@@ -38,6 +38,8 @@ export async function loadSession(db: Db, id: string): Promise<Session> {
   const session: Session = {
     id: row.id,
     question: row.question,
+    brief: row.brief,
+    advisorIds: row.advisor_ids ?? [],
     status: row.status,
     stage: 1,
     recommendation: row.recommendation,

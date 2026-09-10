@@ -63,6 +63,8 @@ export type SessionRow = {
   id: string
   person_id: string
   question: string
+  brief: string
+  advisor_ids: string[]
   status: SessionStatus
   recommendation: string
   synthesis_model: string | null

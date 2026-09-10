@@ -49,6 +49,10 @@ export type SessionVote = { advisorId: string; name: string; initials: string; v
 export type Session = {
   id: string
   question: string
+  /** The client's summary of the business and its situation, pasted at convene time. */
+  brief: string
+  /** Who was invited. Empty means everyone who was active (sessions from before the picker). */
+  advisorIds: string[]
   status: SessionStatus
   /** 0 before any view, 1 independent views, 2 challenge round, 3 synthesis */
   stage: 0 | 1 | 2 | 3

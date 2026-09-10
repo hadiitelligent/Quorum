@@ -2,17 +2,19 @@
  * Provisions the roster, and seeds the advisor personas from seed/advisors.
  *
  *   npm run seed                      roster only
- *   npm run seed -- --advisors        roster + the five personas in seed/advisors
+ *   npm run seed -- --advisors        roster + the personas in seed/advisors
  *   npm run seed -- --advisors --dry-run
  *
  * One JSON file per persona; validated before writing. Idempotent: a persona
  * is matched by name and updated in place, so re-running never duplicates
- * the board. Accounts are created through the admin API — the ONLY way an
+ * the board. A persona's grounding documents live in
+ * seed/documents/<persona file basename>/ with a _documents.json manifest
+ * ({ file, title, category }[]); each is upserted by title. Accounts are created through the admin API — the ONLY way an
  * account comes to exist (signups are off).
  */
 import { config } from 'dotenv'
-import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { basename, join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { ROSTER } from './roster'
@@ -26,6 +28,20 @@ const withAdvisors = process.argv.includes('--advisors')
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+const MANIFEST = z.array(z.object({ file: z.string().min(1), title: z.string().trim().min(1).max(160), category: z.string().trim().max(60).default('') }))
+
+function readDocuments(advisorFile: string): { title: string; category: string; content: string }[] {
+  const dir = join('seed', 'documents', basename(advisorFile, '.json'))
+  const manifestPath = join(dir, '_documents.json')
+  if (!existsSync(manifestPath)) return []
+  const parsed = MANIFEST.safeParse(JSON.parse(readFileSync(manifestPath, 'utf8')))
+  if (!parsed.success) {
+    console.error(`  ✗ ${manifestPath}: ${parsed.error.issues.map((i) => `${i.path.join('.')} ${i.message}`).join('; ')}`)
+    process.exit(1)
+  }
+  return parsed.data.map((m) => ({ title: m.title, category: m.category, content: readFileSync(join(dir, m.file), 'utf8') }))
+}
 
 const SEED_ADVISOR = z.object({
   name: z.string().trim().min(1),
@@ -115,7 +131,8 @@ async function main() {
       order += 1
       const found = existing?.find((e) => e.name === advisor.name)
       if (dryRun) {
-        console.log(`  ${found ? '·' : '+'} ${advisor.name.padEnd(18)} ${found ? 'would update' : 'would create'} (${file})`)
+        const docs = readDocuments(file)
+        console.log(`  ${found ? '·' : '+'} ${advisor.name.padEnd(18)} ${found ? 'would update' : 'would create'} (${file})${docs.length ? ` + ${docs.length} document(s)` : ''}`)
         continue
       }
       const row = { ...advisor, active: true, sort_order: order, updated_by: 'seed' }
@@ -128,6 +145,24 @@ async function main() {
         continue
       }
       console.log(`  ✓ ${advisor.name.padEnd(18)} ${found ? 'updated' : 'created'}`)
+
+      // --- grounding documents ------------------------------------------
+      const docs = readDocuments(file)
+      if (docs.length === 0) continue
+      const { data: idRow } = await admin.from('advisors').select('id').eq('name', advisor.name).maybeSingle()
+      if (!idRow) continue
+      for (const doc of docs) {
+        await admin.from('advisor_documents').delete().eq('advisor_id', idRow.id).eq('title', doc.title)
+        const { error: docError } = await admin
+          .from('advisor_documents')
+          .insert({ advisor_id: idRow.id, title: doc.title, category: doc.category, content: doc.content, uploaded_by: 'seed' })
+        if (docError) {
+          console.error(`      ✗ ${doc.title} — ${docError.message}`)
+          process.exitCode = 1
+          continue
+        }
+      }
+      console.log(`      ${docs.length} grounding document(s), ${docs.reduce((n, d) => n + d.content.length, 0).toLocaleString()} chars`)
     }
   }
 

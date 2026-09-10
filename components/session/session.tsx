@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, CircleNotch, DownloadSimple, SealCheck } from '@phosphor-icons/react'
 import type { Advisor, Session } from '@/lib/quorum/types'
-import { STAGE_LABELS, VOTE_LABELS, dissentOf, mergeSession, nextSteps } from '@/lib/quorum/session'
+import { STAGE_LABELS, VOTE_LABELS, dissentOf, mergeSession, nextSteps, rosterFor } from '@/lib/quorum/session'
 import { memoFilename, sessionMemo } from '@/lib/quorum/memo'
 import { convenedLabel } from '@/lib/quorum/text'
 import { api } from '@/lib/client-api'
@@ -21,7 +21,8 @@ export function SessionView({ id }: { id: string }) {
   const href = useHref()
   const { person } = useShell()
   const [session, setSession] = useState<Session | null>(null)
-  const [roster, setRoster] = useState<Advisor[] | null>(null)
+  const [active, setActive] = useState<Advisor[] | null>(null)
+  const roster = session && active ? rosterFor(session, active) : null
   const [error, setError] = useState<string | null>(null)
   const running = useRef(false)
 
@@ -31,7 +32,7 @@ export function SessionView({ id }: { id: string }) {
       if (!alive) return
       if (s.ok) setSession(s.data.session)
       else setError(s.message)
-      if (a.ok) setRoster(a.data.advisors)
+      if (a.ok) setActive(a.data.advisors)
     })
     return () => {
       alive = false
@@ -109,6 +110,16 @@ export function SessionView({ id }: { id: string }) {
           <h3>{session.question}</h3>
         </div>
       </div>
+
+      {session.brief && (
+        <details className="card elev-sm brief-record">
+          <summary>
+            <span className="kicker muted">The brief</span>
+            <span className="help">{session.brief.length.toLocaleString()} characters · what the board was told</span>
+          </summary>
+          <pre>{session.brief}</pre>
+        </details>
+      )}
 
       <div className="steps" aria-label="Stages">
         {STAGE_LABELS.map((st, i) => (

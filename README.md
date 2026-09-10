@@ -14,14 +14,16 @@ their expertise, ground them in documents, remove.
 - **`docs/status.md`** — what is built, verified, and left.
 - `reference/` — the design prototype (`Quorum.dc.html`) and the Nocturne
   stylesheet this app's `app/globals.css` was ported from.
-- `seed/advisors/` — the five personas from the prototype, one JSON each.
+- `seed/advisors/` — the personas, one JSON each; `seed/documents/` their
+  grounding documents.
 
 ```bash
 npm install
 npm run test:unit                    # the text helpers, the session state machine, the memo, the prompts
 npm run dev                          # http://localhost:3000 (needs .env.local)
 npm run dev && open http://localhost:3000/demo   # the screens over scripted data, no database, no model
-npm run seed -- --advisors           # the roster (scripts/roster.ts) + the five personas
+npm run seed -- --advisors           # the roster (scripts/roster.ts) + the personas and their grounding documents
+npm run import:10x -- lib.json       # the 10X decision library → seed/documents/06-10x-strategic-director/
 npm run deploy                       # preflight (types, lint, unit tests, database suite) → build → Cloudflare → smoke test
 ```
 
